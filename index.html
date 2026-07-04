@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – Vertrek start de dienstregeling</title>
+    <title>Arriva Boordcomputer – Live vertrek countdown</title>
     <style>
         :root {
             --bg-cream: #E8E8D8;
@@ -423,18 +423,16 @@
 
     let currentLine = '54';
     let currentStops = busLines['54'].stops;
-    let startTime = null;
-    let currentStopIndex = -1;
-    let departureTime = null;
+    let startTime = null;        // chosen departure time
+    let currentStopIndex = -1;   // -1: before departure
     let delayMinutes = 0;
     let alertActive = false;
     let alertTimer = null;
-    let countdownTimer = null;
-    let clockTimer = null;
     let cart = [];
 
     const $ = id => document.getElementById(id);
 
+    // Returns planned Date for a stop index based on startTime + offset
     function getPlannedTime(stopIndex) {
         if (!startTime) return null;
         const offset = currentStops[stopIndex].offset;
@@ -446,6 +444,7 @@
         return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
     }
 
+    // =================== CLOCK ===================
     function updateClock() {
         const now = new Date();
         $('clockTime').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
@@ -454,21 +453,25 @@
         $('topDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     }
 
+    // =================== COUNTDOWN BADGE (runs every second) ===================
     function updateCountdownBadge() {
         const badge = $('depBadge');
         if (currentStopIndex === -1 && startTime) {
+            // Before departure: countdown to start time
             const now = new Date();
             const diffMs = startTime - now;
             if (diffMs <= 0) {
                 badge.textContent = 'NU VERTREKKEN!';
                 badge.className = 'departure-badge urgent';
             } else {
-                const diffMin = Math.floor(diffMs / 60000);
-                const diffSec = Math.floor((diffMs % 60000) / 1000);
-                badge.textContent = `Vertrek over: ${String(diffMin).padStart(2,'0')}:${String(diffSec).padStart(2,'0')}`;
-                badge.className = diffMin <= 1 ? 'departure-badge urgent' : (diffMin <= 3 ? 'departure-badge warning' : 'departure-badge');
+                const totalSec = Math.floor(diffMs / 1000);
+                const min = Math.floor(totalSec / 60);
+                const sec = totalSec % 60;
+                badge.textContent = `Vertrek over: ${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+                badge.className = min <= 1 ? 'departure-badge urgent' : (min <= 3 ? 'departure-badge warning' : 'departure-badge');
             }
         } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length - 1 && startTime) {
+            // En route: countdown to next stop
             const nextStopTime = getPlannedTime(currentStopIndex + 1);
             const now = new Date();
             const diffMs = nextStopTime - now;
@@ -476,10 +479,11 @@
                 badge.textContent = 'NU VERTREKKEN!';
                 badge.className = 'departure-badge urgent';
             } else {
-                const diffMin = Math.floor(diffMs / 60000);
-                const diffSec = Math.floor((diffMs % 60000) / 1000);
-                badge.textContent = `Vertrek over: ${String(diffMin).padStart(2,'0')}:${String(diffSec).padStart(2,'0')}`;
-                badge.className = diffMin <= 1 ? 'departure-badge urgent' : (diffMin <= 3 ? 'departure-badge warning' : 'departure-badge');
+                const totalSec = Math.floor(diffMs / 1000);
+                const min = Math.floor(totalSec / 60);
+                const sec = totalSec % 60;
+                badge.textContent = `Vertrek over: ${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+                badge.className = min <= 1 ? 'departure-badge urgent' : (min <= 3 ? 'departure-badge warning' : 'departure-badge');
             }
         } else {
             badge.textContent = 'Vertrek over: --:--';
@@ -487,6 +491,7 @@
         }
     }
 
+    // =================== RENDER STOPS ===================
     function renderStops() {
         const list = $('stopList');
         list.innerHTML = '';
@@ -522,6 +527,7 @@
         }
     }
 
+    // =================== DELAY BOX ===================
     function updateDelayBox() {
         const box = $('delayBox');
         if (currentStopIndex === -1) {
@@ -543,6 +549,7 @@
 
     function recalcDelay() { updateDelayBox(); }
 
+    // =================== START TIME INPUT ===================
     window.setNow = function() {
         const now = new Date();
         const h = String(now.getHours()).padStart(2,'0');
@@ -559,17 +566,17 @@
         startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
         if (currentStopIndex === -1) {
             renderStops();
-            updateCountdownBadge();
         }
+        updateCountdownBadge(); // immediate refresh
     };
 
+    // =================== LINE SWITCH ===================
     window.switchLine = function(lineKey) {
         if (!busLines[lineKey]) return;
         currentLine = lineKey;
         currentStops = busLines[lineKey].stops;
         currentStopIndex = -1;
         startTime = null;
-        departureTime = null;
         delayMinutes = 0;
 
         $('lineNumber').textContent = `${busLines[lineKey].number} Geen Dienst`;
@@ -586,20 +593,19 @@
 
         updateDelayBox();
         renderStops();
-        updateCountdownBadge();
-        setNow();
+        setNow(); // will also set startTime and call updateCountdownBadge
     };
 
+    // =================== DEPART ===================
     window.depart = function() {
-        setStartTimeFromInput();
+        setStartTimeFromInput(); // ensure startTime is set from input
         if (!startTime) {
             alert('Stel eerst een starttijd in.');
             return;
         }
         currentStopIndex = 0;
-        departureTime = new Date();
-        const plannedStart = startTime;
-        const diffMs = departureTime - plannedStart;
+        const now = new Date();
+        const diffMs = now - startTime;
         delayMinutes = Math.round(diffMs / 60000);
         updateDelayBox();
 
@@ -612,18 +618,10 @@
         updateCountdownBadge();
         checkAlerts();
 
-        if (!countdownTimer) {
-            countdownTimer = setInterval(() => {
-                updateCountdownBadge();
-                if (!alertActive && currentStopIndex >= 0) {
-                    recalcDelay();
-                    if (delayMinutes >= 3) showAlert('late');
-                    else if (delayMinutes <= -3) showAlert('early');
-                }
-            }, 1000);
-        }
+        // The countdown badge is already updated by the global setInterval, no extra timer needed
     };
 
+    // =================== NEXT / PREV ===================
     window.nextStop = function() {
         if (currentStopIndex < 0 || currentStopIndex >= currentStops.length - 1) return;
         currentStopIndex++;
@@ -657,6 +655,7 @@
         else if (delayMinutes <= -3) showAlert('early');
     }
 
+    // =================== ALERTS ===================
     window.showAlert = function(type) {
         if (alertActive) return;
         alertActive = true;
@@ -705,9 +704,10 @@
                     count.textContent = 'NU!';
                     count.style.color = 'var(--red-alert)';
                 } else {
-                    const diffMin = Math.floor(diffMs / 60000);
-                    const diffSec = Math.floor((diffMs % 60000) / 1000);
-                    count.textContent = `${String(diffMin).padStart(2,'0')}:${String(diffSec).padStart(2,'0')}`;
+                    const totalSec = Math.floor(diffMs / 1000);
+                    const min = Math.floor(totalSec / 60);
+                    const sec = totalSec % 60;
+                    count.textContent = `${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
                 }
             }
         }, 1000);
@@ -721,6 +721,7 @@
         if (titleEl) titleEl.style.color = '';
     };
 
+    // =================== SPEECH ===================
     window.speak = function(text) {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
@@ -735,6 +736,7 @@
         else alert('Voer een bericht in.');
     };
 
+    // =================== CART ===================
     window.addToCart = function(name, price) { cart.push({name, price}); renderCart(); };
     window.clearCart = function() { cart = []; renderCart(); };
     window.payCart = function() {
@@ -758,6 +760,7 @@
         cartTotal.style.display = 'flex'; payBtn.style.display = 'block'; clearBtn.style.display = 'block';
     }
 
+    // =================== PAGE NAVIGATION ===================
     window.goToPage = function(pageName) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         const pageMap = { 'home': 'pageHome', 'verkoop': 'pageVerkoop', 'omroep': 'pageOmroep', 'instellingen': 'pageInstellingen' };
@@ -770,13 +773,15 @@
         else if (pageName === 'instellingen') $('btnMenu').classList.add('active');
     };
 
+    // =================== INIT ===================
     function init() {
         updateClock();
-        clockTimer = setInterval(updateClock, 1000);
-        setNow();
+        setInterval(updateClock, 1000);
+        setNow(); // sets startTime to current time and updates countdown
         renderStops();
         updateDelayBox();
-        updateCountdownBadge();
+        // Start global countdown badge update every second
+        setInterval(updateCountdownBadge, 1000);
         document.getElementById('lineBtn54').classList.add('active');
     }
 
