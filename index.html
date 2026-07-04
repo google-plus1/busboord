@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – Live vertrek countdown</title>
+    <title>Arriva Boordcomputer – Vaste 2‑minuten interval</title>
     <style>
         :root {
             --bg-cream: #E8E8D8;
@@ -128,13 +128,13 @@
         .bottom-btn.red { background: var(--red-alert); }
         .bottom-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
         .bottom-right { display: flex; align-items: center; gap: 14px; }
-        .departure-badge {
+        .arrival-badge {
             background: var(--green-dark); color: white;
             padding: 4px 12px; border-radius: 12px;
             font-size: 12px; font-weight: 700;
         }
-        .departure-badge.urgent { background: var(--red-alert); animation: pulse-badge 1s infinite; }
-        .departure-badge.warning { background: var(--orange-warn); }
+        .arrival-badge.urgent { background: var(--red-alert); animation: pulse-badge 1s infinite; }
+        .arrival-badge.warning { background: var(--orange-warn); }
         @keyframes pulse-badge { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
         .clock-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-dark); }
         .clock-date { font-size: 11px; color: var(--text-muted); text-align: right; }
@@ -261,8 +261,8 @@
                         <div class="line-status" id="lineStatus">In dienst</div>
                         <div class="destination" id="destination">Halte Busdepot</div>
                         <div class="time-selector">
-                            <label for="startTimeInput">Starttijd:</label>
-                            <input type="time" id="startTimeInput" value="" onchange="setStartTimeFromInput()">
+                            <label for="startTimeInput">Geplande vertrek:</label>
+                            <input type="time" id="startTimeInput" value="" onchange="setPlannedTime()">
                             <button onclick="setNow()">Nu</button>
                         </div>
                     </div>
@@ -293,7 +293,7 @@
                 <button class="bottom-btn blue" id="btnTerug" onclick="prevStop()" disabled>⏮ Terug</button>
             </div>
             <div class="bottom-right">
-                <div class="departure-badge" id="depBadge">Vertrek over: --:--</div>
+                <div class="arrival-badge" id="arrivalBadge">Vertrek: --:--</div>
                 <div>
                     <div class="clock-time" id="clockTime">00:00:00</div>
                     <div class="clock-date" id="clockDate">5 juli 2026</div>
@@ -302,7 +302,7 @@
         </div>
     </div>
 
-    <!-- VERKOOP PAGE -->
+    <!-- VERKOOP PAGE (unchanged) -->
     <div class="page subpage" id="pageVerkoop">
         <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>🎫 Kaartjes Verkopen</h2></div>
         <div class="subpage-content">
@@ -321,7 +321,7 @@
         </div>
     </div>
 
-    <!-- OMROEP PAGE -->
+    <!-- OMROEP PAGE (unchanged) -->
     <div class="page subpage" id="pageOmroep">
         <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>📢 Omroep</h2></div>
         <div class="subpage-content">
@@ -335,7 +335,7 @@
         </div>
     </div>
 
-    <!-- INSTELLINGEN PAGE -->
+    <!-- INSTELLINGEN PAGE (unchanged) -->
     <div class="page subpage" id="pageInstellingen">
         <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>⚙️ Instellingen</h2></div>
         <div class="subpage-content">
@@ -423,8 +423,9 @@
 
     let currentLine = '54';
     let currentStops = busLines['54'].stops;
-    let startTime = null;        // chosen departure time
-    let currentStopIndex = -1;   // -1: before departure
+    let plannedStart = null;
+    let actualStart = null;
+    let currentStopIndex = -1;
     let delayMinutes = 0;
     let alertActive = false;
     let alertTimer = null;
@@ -432,11 +433,10 @@
 
     const $ = id => document.getElementById(id);
 
-    // Returns planned Date for a stop index based on startTime + offset
     function getPlannedTime(stopIndex) {
-        if (!startTime) return null;
+        if (!actualStart) return null;
         const offset = currentStops[stopIndex].offset;
-        return new Date(startTime.getTime() + offset * 60000);
+        return new Date(actualStart.getTime() + offset * 60000);
     }
 
     function formatTime(date) {
@@ -444,7 +444,6 @@
         return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
     }
 
-    // =================== CLOCK ===================
     function updateClock() {
         const now = new Date();
         $('clockTime').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
@@ -453,45 +452,24 @@
         $('topDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     }
 
-    // =================== COUNTDOWN BADGE (runs every second) ===================
-    function updateCountdownBadge() {
-        const badge = $('depBadge');
-        if (currentStopIndex === -1 && startTime) {
-            // Before departure: countdown to start time
-            const now = new Date();
-            const diffMs = startTime - now;
-            if (diffMs <= 0) {
-                badge.textContent = 'NU VERTREKKEN!';
-                badge.className = 'departure-badge urgent';
-            } else {
-                const totalSec = Math.floor(diffMs / 1000);
-                const min = Math.floor(totalSec / 60);
-                const sec = totalSec % 60;
-                badge.textContent = `Vertrek over: ${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-                badge.className = min <= 1 ? 'departure-badge urgent' : (min <= 3 ? 'departure-badge warning' : 'departure-badge');
-            }
-        } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length - 1 && startTime) {
-            // En route: countdown to next stop
+    function updateArrivalBadge() {
+        const badge = $('arrivalBadge');
+        if (currentStopIndex === -1 && plannedStart && !actualStart) {
+            badge.textContent = `Vertrek: ${formatTime(plannedStart)}`;
+            badge.className = 'arrival-badge';
+        } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length - 1 && actualStart) {
             const nextStopTime = getPlannedTime(currentStopIndex + 1);
-            const now = new Date();
-            const diffMs = nextStopTime - now;
-            if (diffMs <= 0) {
-                badge.textContent = 'NU VERTREKKEN!';
-                badge.className = 'departure-badge urgent';
-            } else {
-                const totalSec = Math.floor(diffMs / 1000);
-                const min = Math.floor(totalSec / 60);
-                const sec = totalSec % 60;
-                badge.textContent = `Vertrek over: ${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-                badge.className = min <= 1 ? 'departure-badge urgent' : (min <= 3 ? 'departure-badge warning' : 'departure-badge');
-            }
+            badge.textContent = `Aankomst: ${formatTime(nextStopTime)}`;
+            badge.className = 'arrival-badge';
+        } else if (currentStopIndex >= currentStops.length - 1) {
+            badge.textContent = 'Eindbestemming';
+            badge.className = 'arrival-badge';
         } else {
-            badge.textContent = 'Vertrek over: --:--';
-            badge.className = 'departure-badge';
+            badge.textContent = 'Vertrek: --:--';
+            badge.className = 'arrival-badge';
         }
     }
 
-    // =================== RENDER STOPS ===================
     function renderStops() {
         const list = $('stopList');
         list.innerHTML = '';
@@ -503,7 +481,7 @@
             if (stop.type === 'start') div.classList.add('start');
             if (stop.type === 'end') div.classList.add('end');
 
-            const plannedTime = startTime ? getPlannedTime(idx) : null;
+            const plannedTime = actualStart ? getPlannedTime(idx) : null;
             const timeStr = plannedTime ? formatTime(plannedTime) : '--:--';
 
             let deviationHtml = '';
@@ -527,56 +505,45 @@
         }
     }
 
-    // =================== DELAY BOX ===================
     function updateDelayBox() {
         const box = $('delayBox');
-        if (currentStopIndex === -1) {
+        if (actualStart && plannedStart) {
+            delayMinutes = Math.round((actualStart - plannedStart) / 60000);
+            box.textContent = delayMinutes === 0 ? '0' : (delayMinutes > 0 ? `+${delayMinutes}` : `${delayMinutes}`);
+            if (delayMinutes === 0) box.className = 'delay-box green';
+            else if (delayMinutes > 0) box.className = 'delay-box red';
+            else box.className = 'delay-box early';
+        } else {
             box.textContent = '0';
             box.className = 'delay-box green';
-        } else {
-            const now = new Date();
-            const planned = getPlannedTime(currentStopIndex);
-            if (planned) {
-                const diffMs = now - planned;
-                delayMinutes = Math.round(diffMs / 60000);
-                box.textContent = delayMinutes === 0 ? '0' : (delayMinutes > 0 ? `+${delayMinutes}` : `${delayMinutes}`);
-                if (delayMinutes === 0) box.className = 'delay-box green';
-                else if (delayMinutes > 0) box.className = 'delay-box red';
-                else box.className = 'delay-box early';
-            }
+            delayMinutes = 0;
         }
     }
 
-    function recalcDelay() { updateDelayBox(); }
+    window.setPlannedTime = function() {
+        const timeVal = $('startTimeInput').value;
+        if (!timeVal) return;
+        const [h, m] = timeVal.split(':');
+        const now = new Date();
+        plannedStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
+        updateArrivalBadge();
+    };
 
-    // =================== START TIME INPUT ===================
     window.setNow = function() {
         const now = new Date();
         const h = String(now.getHours()).padStart(2,'0');
         const m = String(now.getMinutes()).padStart(2,'0');
         $('startTimeInput').value = `${h}:${m}`;
-        setStartTimeFromInput();
+        setPlannedTime();
     };
 
-    window.setStartTimeFromInput = function() {
-        const timeVal = $('startTimeInput').value;
-        if (!timeVal) return;
-        const [h, m] = timeVal.split(':');
-        const now = new Date();
-        startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
-        if (currentStopIndex === -1) {
-            renderStops();
-        }
-        updateCountdownBadge(); // immediate refresh
-    };
-
-    // =================== LINE SWITCH ===================
     window.switchLine = function(lineKey) {
         if (!busLines[lineKey]) return;
         currentLine = lineKey;
         currentStops = busLines[lineKey].stops;
         currentStopIndex = -1;
-        startTime = null;
+        plannedStart = null;
+        actualStart = null;
         delayMinutes = 0;
 
         $('lineNumber').textContent = `${busLines[lineKey].number} Geen Dienst`;
@@ -593,60 +560,54 @@
 
         updateDelayBox();
         renderStops();
-        setNow(); // will also set startTime and call updateCountdownBadge
+        setNow();
+        updateArrivalBadge();
     };
 
-    // =================== DEPART ===================
     window.depart = function() {
-        setStartTimeFromInput(); // ensure startTime is set from input
-        if (!startTime) {
-            alert('Stel eerst een starttijd in.');
-            return;
-        }
-        currentStopIndex = 0;
-        const now = new Date();
-        const diffMs = now - startTime;
-        delayMinutes = Math.round(diffMs / 60000);
+        if (!plannedStart) setPlannedTime();
+        actualStart = new Date();
+        currentStopIndex = 1; // direct naar volgende halte na vertrek
+
+        delayMinutes = Math.round((actualStart - plannedStart) / 60000);
         updateDelayBox();
 
         $('lineStatus').textContent = 'In dienst - Actief';
         $('btnVertrek').disabled = true;
         $('btnVolgende').disabled = false;
-        $('btnTerug').disabled = true;
+        $('btnTerug').disabled = false;
 
         renderStops();
-        updateCountdownBadge();
+        updateArrivalBadge();
         checkAlerts();
-
-        // The countdown badge is already updated by the global setInterval, no extra timer needed
     };
 
-    // =================== NEXT / PREV ===================
     window.nextStop = function() {
         if (currentStopIndex < 0 || currentStopIndex >= currentStops.length - 1) return;
         currentStopIndex++;
-        recalcDelay();
         $('btnTerug').disabled = false;
         if (currentStopIndex === currentStops.length - 1) {
             $('btnVolgende').disabled = true;
             $('lineStatus').textContent = 'Eindbestemming bereikt';
         }
         renderStops();
-        updateCountdownBadge();
+        updateArrivalBadge();
         checkAlerts();
     };
 
     window.prevStop = function() {
-        if (currentStopIndex <= 0) return;
-        currentStopIndex--;
-        recalcDelay();
-        $('btnVolgende').disabled = false;
-        if (currentStopIndex === 0) {
+        if (currentStopIndex <= 1) {
+            currentStopIndex = 0;
             $('btnTerug').disabled = true;
+            $('btnVolgende').disabled = false;
+            renderStops();
+            updateArrivalBadge();
+            return;
         }
+        currentStopIndex--;
+        $('btnVolgende').disabled = false;
         renderStops();
-        updateCountdownBadge();
-        checkAlerts();
+        updateArrivalBadge();
     };
 
     function checkAlerts() {
@@ -655,7 +616,6 @@
         else if (delayMinutes <= -3) showAlert('early');
     }
 
-    // =================== ALERTS ===================
     window.showAlert = function(type) {
         if (alertActive) return;
         alertActive = true;
@@ -667,7 +627,7 @@
         const count = $('alertCountdown');
         const btn = $('alertOkBtn');
 
-        const plannedStartStr = startTime ? formatTime(startTime) : '--:--';
+        const plannedStartStr = plannedStart ? formatTime(plannedStart) : '--:--';
         dep.textContent = `Geplande vertrek: ${plannedStartStr}`;
         count.textContent = '--:--';
 
@@ -698,8 +658,8 @@
         alertTimer = setInterval(() => {
             if (!alertActive) return;
             const now = new Date();
-            if (startTime) {
-                const diffMs = startTime - now;
+            if (plannedStart) {
+                const diffMs = plannedStart - now;
                 if (diffMs <= 0) {
                     count.textContent = 'NU!';
                     count.style.color = 'var(--red-alert)';
@@ -721,7 +681,6 @@
         if (titleEl) titleEl.style.color = '';
     };
 
-    // =================== SPEECH ===================
     window.speak = function(text) {
         if (!window.speechSynthesis) return;
         window.speechSynthesis.cancel();
@@ -736,7 +695,6 @@
         else alert('Voer een bericht in.');
     };
 
-    // =================== CART ===================
     window.addToCart = function(name, price) { cart.push({name, price}); renderCart(); };
     window.clearCart = function() { cart = []; renderCart(); };
     window.payCart = function() {
@@ -760,7 +718,6 @@
         cartTotal.style.display = 'flex'; payBtn.style.display = 'block'; clearBtn.style.display = 'block';
     }
 
-    // =================== PAGE NAVIGATION ===================
     window.goToPage = function(pageName) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         const pageMap = { 'home': 'pageHome', 'verkoop': 'pageVerkoop', 'omroep': 'pageOmroep', 'instellingen': 'pageInstellingen' };
@@ -773,15 +730,14 @@
         else if (pageName === 'instellingen') $('btnMenu').classList.add('active');
     };
 
-    // =================== INIT ===================
     function init() {
         updateClock();
         setInterval(updateClock, 1000);
-        setNow(); // sets startTime to current time and updates countdown
+        setNow();
         renderStops();
         updateDelayBox();
-        // Start global countdown badge update every second
-        setInterval(updateCountdownBadge, 1000);
+        updateArrivalBadge();
+        setInterval(updateArrivalBadge, 1000);
         document.getElementById('lineBtn54').classList.add('active');
     }
 
