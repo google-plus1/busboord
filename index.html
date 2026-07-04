@@ -3,329 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – White Text & Glass Timetable & Countdown</title>
+    <title>Arriva Boordcomputer – Vertrek start de dienstregeling</title>
     <style>
         :root {
-            --screen-bg: #0A3D5C;
-            --topbar-bg: #073D5E;
-            --sidebar-bg: #1E8AB5;
-            --white: #FFFFFF;
-            --tile-orange: #D35400;
-            --tile-yellow: #D4AC0D;
-            --tile-green: #239B56;
-            --tile-darkblue: #154360;
-            --tile-red: #A93226;
-            --tile-darkgray: #2C3E50;
-            --btn-blue: #1F618D;
-            --btn-green: #1E8449;
-            --btn-gray: #5D6D7E;
-            --delay-btn-bg: #0F4F74;
+            --bg-cream: #E8E8D8;
+            --bg-light: #F0F0E0;
+            --green-pale: #C8D8B8;
+            --green-mid: #8FB87A;
+            --green-dark: #4A7A3A;
+            --red-alert: #D32F2F;
+            --red-dark: #B71C1C;
+            --orange-warn: #F57C00;
+            --text-dark: #2C2C2C;
+            --text-muted: #666;
+            --sidebar-bg: #D8D8C8;
+            --sidebar-btn: #C0C0B0;
+            --sidebar-btn-active: #8FB87A;
+            --sidebar-btn-hover: #B0B0A0;
+            --border-color: #B8B8A8;
+            --glass-white: rgba(255,255,255,0.94);
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.15);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; width: 100vw; overflow: hidden; background: #000;
+            height: 100vh; width: 100vw; overflow: hidden; background: #1a1a1a;
             font-family: 'Segoe UI', 'Roboto', 'Inter', 'Open Sans', sans-serif;
         }
-        .tablet-frame { width: 100vw; height: 100vh; background: var(--screen-bg); display: flex; flex-direction: column; overflow: hidden; }
+        .tablet-frame {
+            width: 100vw; height: 100vh; max-width: 1200px; max-height: 800px;
+            background: var(--bg-cream); display: flex; flex-direction: column;
+            overflow: hidden; position: relative; border-radius: 8px;
+        }
         .page { display: none; flex-direction: column; height: 100%; width: 100%; }
         .page.active { display: flex; }
 
-        /* TOPBAR */
-        .topbar {
-            background: var(--topbar-bg); height: 15%; min-height: 90px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 18px; gap: 12px; flex-shrink: 0; z-index: 2; color: white;
+        .top-bar {
+            background: var(--bg-light); border-bottom: 2px solid var(--border-color);
+            padding: 6px 16px; display: flex; align-items: center;
+            justify-content: space-between; height: 40px; flex-shrink: 0;
         }
-        .topbar-left { display: flex; align-items: center; gap: 12px; }
-        .icon-btn {
-            width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: background 0.15s; background: transparent; border: none;
-        }
-        .icon-btn:hover { background: rgba(255,255,255,0.15); }
-        .icon-btn svg { width: 22px; height: 22px; fill: white; }
-        .icon-btn.small svg { width: 18px; height: 18px; }
-        .topbar-center { flex: 0 1 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .line-info { display: flex; align-items: center; gap: 10px; }
-        .line-number {
-            font-weight: 600; font-size: 22px; color: white;
-            background: rgba(255,255,255,0.1); padding: 4px 16px; border-radius: 8px;
-        }
-        .destination {
-            font-weight: 400; font-size: 18px; color: white;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .status-square {
-            width: 110px; height: 90px; border-radius: 18px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 32px; color: white;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-            flex-shrink: 0; transition: background 0.3s ease;
-            font-family: 'Courier New', monospace;
-        }
-        .status-square.green { background: #27AE60; }
-        .status-square.yellow { background: #F39C12; }
-        .status-square.red { background: #E74C3C; }
+        .top-bar-left { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .top-bar-left span { color: var(--text-dark); font-weight: 600; }
+        .top-bar-right { display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .status-dot.green { background: #4CAF50; box-shadow: 0 0 6px rgba(76,175,80,0.5); }
 
-        .topbar-right { display: flex; align-items: center; gap: 14px; color: white; font-size: 14px; }
-        .delay-indicator {
-            background: var(--delay-btn-bg); color: white;
-            border: 1px solid rgba(255,255,255,0.3); border-radius: 20px;
-            padding: 4px 14px; font-weight: 600; font-size: 16px;
-            cursor: pointer; transition: background 0.15s;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .delay-indicator:hover { background: #1A5A7A; }
-        .delay-label { font-size: 13px; opacity: 0.9; }
-        .date-time { text-align: right; line-height: 1.3; }
-        .time { font-weight: 600; font-size: 17px; display: block; color: white; }
-        .date { font-size: 13px; opacity: 0.9; color: white; }
-        .icon-dot { width: 11px; height: 11px; border-radius: 50%; }
-        .icon-dot.gps { background: #2ECC71; box-shadow: 0 0 8px rgba(46,204,113,0.8); }
-        .icon-dot.network { background: #3498DB; box-shadow: 0 0 8px rgba(52,152,219,0.8); }
-
-        /* MAIN CONTENT */
-        .main-content { flex: 1; display: flex; min-height: 0; z-index: 1; overflow: hidden; }
-        .left-sidebar {
-            width: 12%; min-width: 100px; background: var(--sidebar-bg);
-            display: flex; flex-direction: column; align-items: center; padding: 8px 4px; gap: 2px; overflow-y: auto;
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        .center-area { flex: 1; display: flex; flex-direction: column; padding: 12px 16px; gap: 10px; overflow: hidden; }
+        .right-sidebar {
+            width: 150px; background: var(--sidebar-bg);
+            border-left: 2px solid var(--border-color);
+            display: flex; flex-direction: column;
+            padding: 8px 6px; gap: 6px; flex-shrink: 0; overflow-y: auto;
         }
         .sidebar-btn {
-            width: 48px; height: 48px; border-radius: 8px; background: var(--sidebar-bg); border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all 0.15s; position: relative; flex-shrink: 0;
+            width: 100%; padding: 10px 6px; border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--sidebar-btn); color: var(--text-dark);
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: all 0.15s; text-align: center;
         }
-        .sidebar-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
-        .sidebar-btn.active { background: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.6); }
-        .sidebar-btn svg { width: 22px; height: 22px; fill: white; }
-        .sidebar-btn .line-badge {
-            position: absolute; bottom: 3px; right: 3px; background: white; color: #0F4F74;
-            font-size: 9px; font-weight: 700; width: 17px; height: 17px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .sidebar-divider { width: 70%; height: 1px; background: rgba(255,255,255,0.5); margin: 5px 0; border-radius: 1px; flex-shrink: 0; }
-        .middle-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px 10px; min-width: 0; overflow: auto; }
-        .tiles-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 10px; width: 100%; max-width: 450px;
-        }
-        .tile {
-            aspect-ratio: 100 / 70; border-radius: 6px; cursor: pointer; display: flex;
-            flex-direction: column; align-items: center; justify-content: center; transition: all 0.18s;
-            border: none; color: white; font-weight: 600; font-size: 13px; text-align: center;
-            gap: 4px; padding: 6px 2px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        }
-        .tile:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.4); filter: brightness(1.1); }
-        .tile:active { transform: scale(0.95); }
-        .tile svg { width: 22px; height: 22px; fill: white; }
-        .tile span { font-size: 12px; line-height: 1.2; }
-        .tile.verkoop { background: var(--tile-orange); }
-        .tile.chipkaart { background: var(--tile-yellow); color: white; }
-        .tile.chipkaart svg { fill: white; }
-        .tile.abonnement { background: var(--tile-green); }
-        .tile.reizigers { background: var(--tile-darkblue); }
-        .tile.rapport { background: var(--tile-red); }
-        .tile.instellingen { background: var(--tile-darkgray); }
-        .tile.deuren { background: #8E44AD; }
-        .tile.verlichting { background: #F1C40F; color: white; }
-        .tile.verlichting svg { fill: white; }
-        .tile.omroep { background: #1ABC9C; }
+        .sidebar-btn:hover { background: var(--sidebar-btn-hover); transform: translateY(-1px); }
+        .sidebar-btn.active { background: var(--sidebar-btn-active); color: white; border-color: var(--green-dark); }
 
-        /* RIGHT PANEL GLASS */
-        .right-panel {
-            width: 35%; min-width: 280px; display: flex; flex-direction: column;
-            background: transparent; padding: 8px 10px 8px 6px;
+        .header-info { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+        .header-left { flex: 1; }
+        .line-number { font-size: 26px; font-weight: 900; color: var(--text-dark); line-height: 1.1; }
+        .line-status { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .destination { font-size: 17px; font-weight: 600; color: var(--text-dark); margin-top: 3px; }
+        .delay-box {
+            width: 85px; height: 65px; background: var(--green-dark);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 22px; font-weight: 900; flex-shrink: 0;
+            box-shadow: var(--shadow-soft); transition: all 0.3s;
+            font-family: 'Courier New', monospace;
         }
-        .right-panel-header {
-            background: rgba(11, 93, 134, 0.8); backdrop-filter: blur(10px);
-            border-radius: 8px 8px 0 0; padding: 10px 14px;
-            color: white; font-weight: 600; font-size: 19px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-        .right-panel-content {
-            flex: 1; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px);
-            border-radius: 0 0 8px 8px; padding: 10px 12px;
-            overflow-y: auto; display: flex; flex-direction: column; gap: 3px;
-            border: 1px solid rgba(255,255,255,0.25); color: white;
-        }
-        .route-info-summary { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; font-size: 12px; font-weight: 500; }
-        .route-info-summary .badge {
-            background: rgba(255,255,255,0.15); color: white; padding: 3px 10px; border-radius: 14px;
-            font-weight: 500;
+        .delay-box.red { background: var(--red-alert); }
+        .delay-box.yellow { background: var(--orange-warn); }
+        .delay-box.early { background: #1976D2; }
+
+        .stop-list {
+            flex: 1; overflow-y: auto; border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--green-pale); padding: 8px;
+            display: flex; flex-direction: column; gap: 3px;
         }
         .stop-item {
-            display: flex; align-items: center; gap: 8px; padding: 6px 8px;
-            border-radius: 5px; font-size: 13px; transition: background 0.12s;
-            border-left: 4px solid transparent; color: white;
+            display: flex; align-items: center; padding: 7px 12px;
+            border-radius: 6px; font-size: 13px; font-weight: 500;
+            transition: all 0.15s; border-left: 4px solid transparent;
+            color: var(--text-dark);
         }
-        .stop-item:hover { background: rgba(255,255,255,0.15); }
-        .stop-item.start { background: rgba(46, 204, 113, 0.25); border-left-color: #2ECC71; color: white; }
-        .stop-item.end { background: rgba(192, 57, 43, 0.25); border-left-color: #C0392B; color: white; }
-        .stop-item.current { background: rgba(241, 196, 15, 0.3); border-left-color: #F1C40F; font-weight: 700; color: white; }
-        .stop-item.departed { opacity: 0.5; background: rgba(255,255,255,0.05); border-left-color: #95A5A6; color: white; }
-        .stop-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
-        .stop-name { flex: 1; font-weight: 500; color: white; }
-        .stop-time-info { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 11px; color: white; }
-        .stop-time { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; color: white; }
-        .stop-real-time { background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 10px; color: white; }
-        .stop-deviation { font-weight: 700; padding: 1px 6px; border-radius: 8px; font-size: 10px; }
-        .stop-deviation.late { background: rgba(231, 76, 60, 0.4); color: white; }
-        .stop-deviation.early { background: rgba(39, 174, 96, 0.4); color: white; }
-        .stop-deviation.ontime { background: rgba(255,255,255,0.3); color: white; }
+        .stop-item:hover { background: rgba(255,255,255,0.4); }
+        .stop-item.current { background: rgba(255,255,255,0.75); border-left-color: var(--orange-warn); font-weight: 700; }
+        .stop-item.past { opacity: 0.45; text-decoration: line-through; }
+        .stop-item.start { border-left-color: var(--green-dark); background: rgba(74,122,58,0.12); }
+        .stop-item.end { border-left-color: var(--red-alert); background: rgba(211,47,47,0.08); }
+        .stop-name { flex: 1; }
+        .stop-time { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-muted); margin-right: 8px; }
+        .stop-deviation {
+            font-size: 11px; padding: 2px 8px; border-radius: 10px;
+            font-weight: 700; margin-left: 8px;
+        }
+        .stop-deviation.late { background: rgba(211,47,47,0.18); color: var(--red-dark); }
+        .stop-deviation.early { background: rgba(25,118,210,0.18); color: #1565C0; }
+        .stop-deviation.ontime { background: rgba(74,122,58,0.18); color: var(--green-dark); }
 
-        .bottombar {
-            background: #073D5E; height: 8%; min-height: 48px;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 14px; z-index: 2; flex-shrink: 0;
+        .bottom-bar {
+            background: var(--bg-light); border-top: 2px solid var(--border-color);
+            padding: 8px 16px; display: flex; align-items: center;
+            justify-content: space-between; height: 52px; flex-shrink: 0;
         }
-        .bottombar-left, .bottombar-right { display: flex; align-items: center; gap: 6px; }
-        .bottombar-btn {
-            width: 36px; height: 36px; border-radius: 8px; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
-            font-size: 16px; font-weight: bold; color: white;
+        .bottom-left { display: flex; gap: 8px; }
+        .bottom-btn {
+            padding: 8px 18px; border-radius: 6px; border: none;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            transition: all 0.15s; color: white;
         }
-        .bottombar-btn:hover { filter: brightness(1.2); transform: scale(1.08); }
-        .bottombar-btn.blue { background: var(--btn-blue); }
-        .bottombar-btn.green { background: var(--btn-green); }
-        .bottombar-btn.gray { background: var(--btn-gray); }
-        .bottombar-label { color: white; font-size: 12px; font-weight: 500; opacity: 0.85; margin: 0 6px; }
-        .route-control-btn {
-            padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 14px;
-            border: none; cursor: pointer; color: white; transition: all 0.15s;
-            display: flex; align-items: center; gap: 5px;
+        .bottom-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+        .bottom-btn:active { transform: scale(0.96); }
+        .bottom-btn.green { background: var(--green-dark); }
+        .bottom-btn.blue { background: #1976D2; }
+        .bottom-btn.red { background: var(--red-alert); }
+        .bottom-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .bottom-right { display: flex; align-items: center; gap: 14px; }
+        .departure-badge {
+            background: var(--green-dark); color: white;
+            padding: 4px 12px; border-radius: 12px;
+            font-size: 12px; font-weight: 700;
         }
-        .route-control-btn.depart { background: #2ECC71; }
-        .route-control-btn.next { background: #3498DB; }
-        .route-control-btn.back { background: #95A5A6; }
-        .route-control-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(30%); }
-        .route-control-btn:not(:disabled):hover { filter: brightness(1.15); transform: scale(1.02); }
+        .departure-badge.urgent { background: var(--red-alert); animation: pulse-badge 1s infinite; }
+        .departure-badge.warning { background: var(--orange-warn); }
+        @keyframes pulse-badge { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+        .clock-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-dark); }
+        .clock-date { font-size: 11px; color: var(--text-muted); text-align: right; }
 
-        /* subpages keep their own readable colors */
-        .verkoop-page, .info-page, .rapport-page, .instellingen-page { background: #f0f4f8; color: #333; }
-        .verkoop-header { background: var(--topbar-bg); color: white; padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-        .verkoop-header h2 { font-size: 20px; font-weight: 600; }
-        .verkoop-content, .info-content, .rapport-content, .instellingen-content { flex: 1; overflow-y: auto; padding: 16px; }
-        .ticket-section, .cart-section, .info-card, .rapport-card, .settings-section { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 12px; }
-        .ticket-card { background: linear-gradient(135deg, #1E8AB5, #0B5D86); color: white; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; border: none; }
-        .ticket-card:hover { transform: translateY(-3px); }
-        .ticket-card .ticket-icon { font-size: 28px; }
-        .ticket-card .ticket-name { font-weight: 600; font-size: 14px; }
-        .ticket-card .ticket-price { font-weight: 700; font-size: 18px; }
-        .ticket-card.orange { background: linear-gradient(135deg, #E67E22, #D35400); }
-        .ticket-card.green { background: linear-gradient(135deg, #2ECC71, #239B56); }
-        .ticket-card.purple { background: linear-gradient(135deg, #9B59B6, #8E44AD); }
-        .cart-item { display: flex; justify-content: space-between; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; }
-        .cart-total { display: flex; justify-content: space-between; padding: 12px; background: #0B5D86; color: white; border-radius: 8px; font-weight: 700; }
-        .pay-btn { width: 100%; padding: 14px; background: #2ECC71; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
-        .clear-btn { width: 100%; padding: 10px; background: #E74C3C; color: white; border: none; border-radius: 10px; cursor: pointer; }
-        .action-btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 12px; }
-        .action-btn.blue { background: #3498DB; color: white; }
-        .action-btn.green { background: #2ECC71; color: white; }
-        .action-btn.red { background: #E74C3C; color: white; }
-        .action-btn.orange { background: #E67E22; color: white; }
-        .function-btn { width: 100%; padding: 14px; margin: 6px 0; border-radius: 10px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; }
+        .alert-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px); z-index: 1000;
+            display: none; align-items: center; justify-content: center; padding: 24px;
+        }
+        .alert-overlay.show { display: flex; }
+        .alert-card {
+            background: var(--glass-white); border-radius: 16px;
+            padding: 32px 36px; max-width: 480px; width: 100%;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            border: 2px solid var(--border-color);
+            animation: alertSlide 0.4s ease-out;
+        }
+        @keyframes alertSlide { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .alert-icon { font-size: 48px; margin-bottom: 10px; }
+        .alert-title { font-size: 24px; font-weight: 900; margin-bottom: 12px; color: var(--text-dark); }
+        .alert-title.late { color: var(--red-alert); }
+        .alert-title.early { color: #1565C0; }
+        .alert-message { font-size: 16px; color: var(--text-dark); margin-bottom: 10px; line-height: 1.6; }
+        .alert-departure {
+            font-size: 17px; font-weight: 700; color: var(--text-dark);
+            background: var(--green-pale); padding: 10px 20px;
+            border-radius: 8px; margin: 14px 0; display: inline-block;
+            border: 2px solid var(--green-dark);
+        }
+        .alert-countdown { font-size: 40px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--red-alert); margin: 10px 0; }
+        .alert-ok-btn {
+            padding: 14px 44px; border-radius: 10px; border: none;
+            font-size: 17px; font-weight: 700; cursor: pointer;
+            color: white; margin-top: 14px; transition: all 0.15s;
+            box-shadow: var(--shadow-soft);
+        }
+        .alert-ok-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .alert-ok-btn:active { transform: scale(0.96); }
+        .alert-ok-btn.late-bg { background: var(--red-alert); }
+        .alert-ok-btn.early-bg { background: #1976D2; }
+        .alert-ok-btn.test-bg { background: var(--green-dark); }
+
+        .time-selector {
+            display: flex; align-items: center; gap: 8px; margin-top: 6px;
+        }
+        .time-selector label { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+        .time-selector input[type="time"] {
+            padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);
+            font-size: 14px; background: white; color: var(--text-dark);
+        }
+        .time-selector button {
+            padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color);
+            background: var(--sidebar-btn); font-weight: 600; cursor: pointer;
+        }
+
+        .stop-list::-webkit-scrollbar { width: 6px; }
+        .stop-list::-webkit-scrollbar-track { background: transparent; }
+        .stop-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+        .subpage { background: #f0f4f8; color: #333; }
+        .subpage-header { background: var(--bg-light); border-bottom: 2px solid var(--border-color); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .subpage-header h2 { font-size: 18px; font-weight: 600; color: var(--text-dark); }
+        .subpage-content { flex: 1; overflow-y: auto; padding: 16px; }
+        .card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 12px; border: 1px solid var(--border-color); }
+        .card h3 { font-size: 15px; margin-bottom: 10px; color: var(--text-dark); }
+        .action-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 8px; color: white; transition: all 0.15s; }
+        .action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .action-btn.blue { background: #3498DB; }
+        .action-btn.green { background: var(--green-dark); }
+        .action-btn.red { background: var(--red-alert); }
+        .action-btn.orange { background: #E67E22; }
+        .function-btn { width: 100%; padding: 12px; margin: 4px 0; border-radius: 8px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; color: white; }
+        .function-btn:hover { filter: brightness(1.1); }
         .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .stat-box { background: #f0f6fa; border-radius: 10px; padding: 14px; text-align: center; }
-        .stat-value { font-size: 24px; font-weight: 700; color: #0B5D86; }
-        .stat-label { font-size: 12px; color: #666; margin-top: 4px; }
-        .settings-btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; }
-        .settings-btn.blue { background: #3498DB; color: white; }
-        .settings-btn.red { background: #E74C3C; color: white; }
-        .toggle-switch { width: 48px; height: 26px; background: #ccc; border-radius: 13px; position: relative; cursor: pointer; }
-        .toggle-switch.active { background: #2ECC71; }
-        .toggle-switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.3s; }
-        .toggle-switch.active::after { transform: translateX(22px); }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #c0c8d0; border-radius: 10px; }
+        .stat-box { background: var(--bg-light); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid var(--border-color); }
+        .stat-value { font-size: 22px; font-weight: 700; color: var(--green-dark); }
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+        .ticket-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .ticket-card { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); color: white; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; border: none; transition: all 0.15s; }
+        .ticket-card:hover { transform: translateY(-2px); }
+        .ticket-card .ticket-name { font-weight: 600; font-size: 13px; }
+        .ticket-card .ticket-price { font-weight: 700; font-size: 16px; }
+        .ticket-card.orange { background: linear-gradient(135deg, #E67E22, #D35400); }
+        .ticket-card.purple { background: linear-gradient(135deg, #9B59B6, #8E44AD); }
+        .cart-item { display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-light); border-radius: 6px; margin-bottom: 4px; }
+        .cart-total { display: flex; justify-content: space-between; padding: 10px; background: var(--green-dark); color: white; border-radius: 6px; font-weight: 700; margin-top: 8px; }
+        .pay-btn { width: 100%; padding: 12px; background: var(--green-dark); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+        .clear-btn { width: 100%; padding: 10px; background: var(--red-alert); color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 6px; }
+        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .toggle-switch.active { background: var(--green-dark); }
+        .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.3s; }
+        .toggle-switch.active::after { transform: translateX(20px); }
+        textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); font-family: inherit; resize: vertical; }
+        .back-btn { width: 32px; height: 32px; border-radius: 6px; border: none; background: var(--sidebar-btn); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .back-btn:hover { background: var(--sidebar-btn-hover); }
     </style>
 </head>
 <body>
 <div class="tablet-frame">
+
     <!-- HOME PAGE -->
     <div class="page active" id="pageHome">
-        <div class="topbar">
-            <div class="topbar-left">
-                <button class="icon-btn" title="Home"><svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h5v-7h6v7h5V9z"/></svg></button>
-                <button class="icon-btn small" title="Waarschuwing"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg></button>
-                <button class="icon-btn small" title="Info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2"/><path d="M12 16v-4M12 8v-1.5" stroke="white" stroke-width="2.5" fill="none"/></svg></button>
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <span id="topDate">5 jul 2026</span>
+                <span style="color:var(--text-muted)">|</span>
+                <span>Lijn <span id="topLineNum">54</span></span>
+                <span style="color:var(--text-muted)">|</span>
+                <span>Bestuurder: <span id="topDriver">J. de Vries</span></span>
+                <span style="color:var(--text-muted)">|</span>
+                <span>Omloop: <span id="topOmloop">A</span></span>
             </div>
-            <div class="topbar-center">
-                <div class="line-info">
-                    <span class="line-number" id="topLineNumber">Lijn 54</span>
-                    <span class="destination" id="topDestination">Halte Busdepot</span>
-                </div>
-                <div class="status-square green" id="statusSquare">0</div>
-            </div>
-            <div class="topbar-right">
-                <div class="delay-indicator" id="delayIndicator"><span class="delay-label">Afw</span> <span id="delayValue">0</span></div>
-                <div class="date-time">
-                    <span class="time" id="currentTime">12:34</span>
-                    <span class="date" id="currentDate">4 jul 2026</span>
-                </div>
-                <span class="icon-dot gps"></span><span class="icon-dot network"></span>
+            <div class="top-bar-right">
+                <span class="status-dot green" id="gpsDot" title="GPS"></span>
+                <span class="status-dot green" id="netDot" title="Netwerk"></span>
             </div>
         </div>
-        <div class="main-content">
-            <div class="left-sidebar" id="leftSidebar">
-                <button class="sidebar-btn active" data-line="54"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">54</span></button>
-                <button class="sidebar-btn" data-line="18"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">18</span></button>
-                <button class="sidebar-btn" data-line="27"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">27</span></button>
-                <button class="sidebar-btn" data-line="42"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">42</span></button>
-                <div class="sidebar-divider"></div>
-                <button class="sidebar-btn" title="Kaart"><svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></button>
-                <button class="sidebar-btn" title="Klok"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="2"/><polyline points="12,7 12,12 16,14" fill="none" stroke="white" stroke-width="2"/></svg></button>
-                <button class="sidebar-btn" title="Meldingen"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></button>
-            </div>
-            <div class="middle-section">
-                <div class="tiles-grid">
-                    <button class="tile verkoop" onclick="goToPage('verkoop')"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" fill="none" stroke="white" stroke-width="2.5"/><line x1="15" y1="15" x2="21" y2="21" stroke="white" stroke-width="3"/></svg><span>Verkoop</span></button>
-                    <button class="tile chipkaart" onclick="goToPage('chipkaart')"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="white" stroke-width="2"/></svg><span>Chipkaart</span></button>
-                    <button class="tile abonnement" onclick="goToPage('abonnement')"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Abonnement</span></button>
-                    <button class="tile reizigers" onclick="goToPage('reizigers')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Reizigers</span></button>
-                    <button class="tile rapport" onclick="goToPage('rapport')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Rapport</span></button>
-                    <button class="tile instellingen" onclick="goToPage('instellingen')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Instellingen</span></button>
-                    <button class="tile deuren" onclick="goToPage('deuren')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="18" rx="1" fill="none" stroke="white" stroke-width="2"/><rect x="13" y="3" width="8" height="18" rx="1" fill="none" stroke="white" stroke-width="2"/></svg><span>Deuren</span></button>
-                    <button class="tile verlichting" onclick="goToPage('verlichting')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke="white" stroke-width="2"/><line x1="12" y1="2" x2="12" y2="7" stroke="white" stroke-width="2"/></svg><span>Verlichting</span></button>
-                    <button class="tile omroep" onclick="goToPage('omroep')"><svg viewBox="0 0 24 24"><path d="M12 2L8 9H3v6h5l4 7V2z" fill="none" stroke="white" stroke-width="2"/></svg><span>Omroep</span></button>
+
+        <div class="main-layout">
+            <div class="center-area">
+                <div class="header-info">
+                    <div class="header-left">
+                        <div class="line-number" id="lineNumber">54 Geen Dienst</div>
+                        <div class="line-status" id="lineStatus">In dienst</div>
+                        <div class="destination" id="destination">Halte Busdepot</div>
+                        <div class="time-selector">
+                            <label for="startTimeInput">Starttijd:</label>
+                            <input type="time" id="startTimeInput" value="" onchange="setStartTimeFromInput()">
+                            <button onclick="setNow()">Nu</button>
+                        </div>
+                    </div>
+                    <div class="delay-box green" id="delayBox">0</div>
                 </div>
+                <div class="stop-list" id="stopList"></div>
             </div>
-            <div class="right-panel">
-                <div class="right-panel-header" id="rightPanelTitle">Route: Lijn 54</div>
-                <div class="right-panel-content" id="rightPanelContent"></div>
+
+            <div class="right-sidebar">
+                <button class="sidebar-btn active" onclick="switchLine('54')" id="lineBtn54">🚌 Lijn 54</button>
+                <button class="sidebar-btn" onclick="switchLine('18')" id="lineBtn18">🚌 Lijn 18</button>
+                <button class="sidebar-btn" onclick="switchLine('27')" id="lineBtn27">🚌 Lijn 27</button>
+                <button class="sidebar-btn" onclick="switchLine('42')" id="lineBtn42">🚌 Lijn 42</button>
+                <button class="sidebar-btn" onclick="showAlert('test')">🧪 Test Melding</button>
+                <button class="sidebar-btn" id="btnBestuurder">Bestuurder</button>
+                <button class="sidebar-btn" id="btnOmloop">Omloop</button>
+                <button class="sidebar-btn" id="btnHoofdscherm">Hoofdscherm</button>
+                <button class="sidebar-btn" id="btnKaart" onclick="goToPage('verkoop')">Kaartverkoop</button>
+                <button class="sidebar-btn" id="btnOproep" onclick="goToPage('omroep')">Oproepen</button>
+                <button class="sidebar-btn" id="btnMenu" onclick="goToPage('instellingen')">Menu</button>
             </div>
         </div>
-        <div class="bottombar">
-            <div class="bottombar-left">
-                <button class="bottombar-btn blue"><svg viewBox="0 0 24 24"><polygon points="12,2 22,21 2,21" fill="white"/></svg></button>
-                <button class="bottombar-btn gray"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button>
-                <span class="bottombar-label">Arriva</span>
-                <button class="bottombar-btn green"><svg viewBox="0 0 24 24"><polyline points="5,13 10,18 19,6" fill="none" stroke="white" stroke-width="3"/></svg></button>
-                <button class="bottombar-btn blue"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6" stroke="white" stroke-width="2.5"/></svg></button>
+
+        <div class="bottom-bar">
+            <div class="bottom-left">
+                <button class="bottom-btn green" id="btnVertrek" onclick="depart()">🚌 Vertrek</button>
+                <button class="bottom-btn blue" id="btnVolgende" onclick="nextStop()" disabled>⏭ Volgende</button>
+                <button class="bottom-btn blue" id="btnTerug" onclick="prevStop()" disabled>⏮ Terug</button>
             </div>
-            <div class="bottombar-right">
-                <button class="route-control-btn depart" id="btnDepart">🚌 Vertrek</button>
-                <button class="route-control-btn next" id="btnNext">⏭ Volgende</button>
-                <button class="route-control-btn back" id="btnBack">⏮ Terug</button>
+            <div class="bottom-right">
+                <div class="departure-badge" id="depBadge">Vertrek over: --:--</div>
+                <div>
+                    <div class="clock-time" id="clockTime">00:00:00</div>
+                    <div class="clock-date" id="clockDate">5 juli 2026</div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- VERKOOP PAGE -->
-    <div class="page verkoop-page" id="pageVerkoop">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>🎫 Kaartjes Verkopen</h2></div>
-        <div class="verkoop-content">
-            <div class="ticket-section">
-                <h3>🚌 Buskaartjes</h3>
-                <div class="ticket-grid">
-                    <button class="ticket-card" onclick="addToCart('Enkele reis', 3.50)"><span class="ticket-icon">🎫</span><span class="ticket-name">Enkele reis</span><span class="ticket-price">€3,50</span></button>
-                    <button class="ticket-card orange" onclick="addToCart('Retour', 6.00)"><span class="ticket-icon">🔄</span><span class="ticket-name">Retour</span><span class="ticket-price">€6,00</span></button>
-                    <button class="ticket-card green" onclick="addToCart('Dagkaart', 9.50)"><span class="ticket-icon">☀️</span><span class="ticket-name">Dagkaart</span><span class="ticket-price">€9,50</span></button>
-                    <button class="ticket-card purple" onclick="addToCart('Groepskaart (5p)', 15.00)"><span class="ticket-icon">👥</span><span class="ticket-name">Groepskaart 5p</span><span class="ticket-price">€15,00</span></button>
-                </div>
-            </div>
-            <div class="cart-section">
-                <h3>🛒 Winkelwagen</h3>
-                <div class="cart-items" id="cartItems"><div style="text-align:center;color:#888;padding:20px;">Nog geen kaartjes geselecteerd</div></div>
+    <div class="page subpage" id="pageVerkoop">
+        <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>🎫 Kaartjes Verkopen</h2></div>
+        <div class="subpage-content">
+            <div class="card"><h3>🚌 Buskaartjes</h3><div class="ticket-grid">
+                <button class="ticket-card" onclick="addToCart('Enkele reis',3.50)"><span class="ticket-name">Enkele reis</span><span class="ticket-price">€3,50</span></button>
+                <button class="ticket-card orange" onclick="addToCart('Retour',6.00)"><span class="ticket-name">Retour</span><span class="ticket-price">€6,00</span></button>
+                <button class="ticket-card" onclick="addToCart('Dagkaart',9.50)"><span class="ticket-name">Dagkaart</span><span class="ticket-price">€9,50</span></button>
+                <button class="ticket-card purple" onclick="addToCart('Groepskaart 5p',15.00)"><span class="ticket-name">Groepskaart 5p</span><span class="ticket-price">€15,00</span></button>
+            </div></div>
+            <div class="card"><h3>🛒 Winkelwagen</h3>
+                <div id="cartItems"><div style="text-align:center;color:#888;padding:16px;">Nog geen kaartjes geselecteerd</div></div>
                 <div class="cart-total" id="cartTotal" style="display:none;"><span>Totaal</span><span id="totalPrice">€0,00</span></div>
                 <button class="pay-btn" id="payBtn" onclick="payCart()" style="display:none;">💳 Afrekenen</button>
                 <button class="clear-btn" id="clearBtn" onclick="clearCart()" style="display:none;">🗑️ Leegmaken</button>
@@ -333,74 +321,46 @@
         </div>
     </div>
 
-    <!-- CHIPKAART PAGE -->
-    <div class="page info-page" id="pageChipkaart">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>💳 Chipkaart</h2></div>
-        <div class="info-content">
-            <div class="info-card"><div class="big-icon">💳</div><h3>OV-chipkaart Services</h3><p>Scan een OV-chipkaart om saldo te controleren of op te laden.</p><button class="action-btn blue" onclick="simulateScan('chipkaart')">📡 Chipkaart Scannen</button></div>
-            <div class="info-card" id="chipkaartResult" style="display:none;"><div class="big-icon">✅</div><h3>Kaart Gescand</h3><p id="chipkaartText">Saldo: €24,50<br>Laatste rit: Lijn 54<br>Kaartnummer: 3528 **** **** 4912</p><button class="action-btn green" onclick="simulateLoad('chipkaart')">💰 €10,00 Opladen</button></div>
-        </div>
-    </div>
-
-    <!-- ABONNEMENT PAGE -->
-    <div class="page info-page" id="pageAbonnement">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>📋 Abonnementen</h2></div>
-        <div class="info-content">
-            <div class="info-card"><div class="big-icon">📋</div><h3>Abonnement Services</h3><p>Controleer abonnementen en verlengingen.</p><button class="action-btn blue" onclick="simulateScan('abonnement')">🔍 Abonnement Controleren</button></div>
-            <div class="info-card" id="abonnementResult" style="display:none;"><div class="big-icon">✅</div><h3>Abonnement Gevonden</h3><p id="abonnementText">Type: Maandabonnement Bus<br>Geldig tot: 31 juli 2026</p><button class="action-btn orange" onclick="alert('Verlenging verwerkt!')">🔄 Verlengen</button></div>
-        </div>
-    </div>
-
-    <!-- REIZIGERS PAGE -->
-    <div class="page info-page" id="pageReizigers">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>👥 Reizigers</h2></div>
-        <div class="info-content">
-            <div class="info-card"><div class="big-icon">👥</div><h3>Reizigers Informatie</h3><p>Aantal reizigers: <strong id="passengerCount">24</strong></p><button class="action-btn blue" onclick="updatePassengers()">🔄 Aantal Bijwerken</button></div>
-        </div>
-    </div>
-
-    <!-- RAPPORT PAGE -->
-    <div class="page rapport-page" id="pageRapport">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>📊 Rapportages</h2></div>
-        <div class="rapport-content">
-            <div class="rapport-card"><h3>📈 Dagstatistieken</h3><div class="stat-grid"><div class="stat-box"><div class="stat-value">142</div><div class="stat-label">Verkochte kaartjes</div></div><div class="stat-box"><div class="stat-value">€487</div><div class="stat-label">Omzet vandaag</div></div></div></div>
+    <!-- OMROEP PAGE -->
+    <div class="page subpage" id="pageOmroep">
+        <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>📢 Omroep</h2></div>
+        <div class="subpage-content">
+            <div class="card"><h3>Standaard Berichten</h3>
+                <button class="function-btn action-btn blue" onclick="speak('De volgende halte is in aantocht.')">🚏 Volgende halte</button>
+                <button class="function-btn action-btn blue" onclick="speak('Wij naderen de eindbestemming.')">🏁 Eindbestemming</button>
+                <button class="function-btn action-btn blue" onclick="speak('De deuren gaan sluiten. Houd afstand.')">🔒 Deuren sluiten</button>
+            </div>
+            <div class="card"><h3>Eigen Omroep</h3><textarea id="customAnnouncement" rows="3" placeholder="Typ uw bericht..."></textarea>
+                <button class="function-btn action-btn orange" onclick="playCustom()">📢 Verzenden</button></div>
         </div>
     </div>
 
     <!-- INSTELLINGEN PAGE -->
-    <div class="page instellingen-page" id="pageInstellingen">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>⚙️ Instellingen</h2></div>
-        <div class="instellingen-content">
-            <div class="settings-section"><h3>🔊 Audio</h3><div class="setting-row"><div><div class="setting-label">Spraakomroepen</div></div><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div></div>
-            <div class="settings-section"><h3>⚡ Acties</h3><div class="setting-row"><button class="settings-btn blue" onclick="alert('Data gesynchroniseerd!')">🔄 Sync</button><button class="settings-btn red" onclick="if(confirm('Weet je het zeker?')) alert('App gereset!')">🗑️ Reset</button></div></div>
+    <div class="page subpage" id="pageInstellingen">
+        <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>⚙️ Instellingen</h2></div>
+        <div class="subpage-content">
+            <div class="card"><h3>🔊 Audio</h3>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><span>Spraakomroepen</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;"><span>Meldinggeluiden</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div>
+            </div>
+            <div class="card"><h3>⚡ Acties</h3>
+                <button class="action-btn blue" onclick="alert('Data gesynchroniseerd!')">🔄 Synchroniseren</button>
+                <button class="action-btn red" onclick="if(confirm('Weet je het zeker?')) location.reload()">🗑️ App Resetten</button>
+            </div>
+            <div class="card"><h3>📊 Rapportages</h3>
+                <div class="stat-grid"><div class="stat-box"><div class="stat-value">142</div><div class="stat-label">Verkochte kaartjes</div></div><div class="stat-box"><div class="stat-value">€487</div><div class="stat-label">Omzet vandaag</div></div></div>
+            </div>
         </div>
     </div>
 
-    <!-- DEUREN PAGE -->
-    <div class="page info-page" id="pageDeuren">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>🚪 Deuren</h2></div>
-        <div class="info-content">
-            <div class="info-card"><h3>Voorste deur</h3><button class="function-btn action-btn green" id="frontDoorOpen" onclick="toggleDoor('front')">🔓 Openen</button><p id="frontDoorStatus">Gesloten</p></div>
-            <div class="info-card"><h3>Achterste deur</h3><button class="function-btn action-btn green" id="rearDoorOpen" onclick="toggleDoor('rear')">🔓 Openen</button><p id="rearDoorStatus">Gesloten</p></div>
-            <div class="info-card"><button class="function-btn action-btn red" onclick="closeAllDoors()">🔐 Alle deuren sluiten</button></div>
-        </div>
-    </div>
-
-    <!-- VERLICHTING PAGE -->
-    <div class="page info-page" id="pageVerlichting">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>💡 Verlichting</h2></div>
-        <div class="info-content">
-            <div class="info-card"><h3>Binnenverlichting</h3><button class="function-btn action-btn green" id="interiorLightBtn" onclick="toggleLight('interior')">💡 Aanzetten</button><p id="interiorLightStatus">Uit</p></div>
-            <div class="info-card"><h3>Buitenverlichting</h3><button class="function-btn action-btn green" id="exteriorLightBtn" onclick="toggleLight('exterior')">💡 Aanzetten</button><p id="exteriorLightStatus">Uit</p></div>
-        </div>
-    </div>
-
-    <!-- OMROEP PAGE -->
-    <div class="page info-page" id="pageOmroep">
-        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>📢 Omroep</h2></div>
-        <div class="info-content">
-            <div class="info-card"><h3>Standaard Omroepberichten</h3><button class="function-btn action-btn blue" onclick="playAnnouncement('volgende_halte')">🚏 Volgende halte</button><button class="function-btn action-btn blue" onclick="playAnnouncement('eindbestemming')">🏁 Eindbestemming</button><button class="function-btn action-btn blue" onclick="playAnnouncement('deuren_sluiten')">🔒 Deuren sluiten</button></div>
-            <div class="info-card"><h3>Eigen Omroep</h3><textarea id="customAnnouncement" rows="3" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Typ uw bericht..."></textarea><button class="function-btn action-btn orange" onclick="playCustomAnnouncement()">📢 Verzenden</button></div>
+    <div class="alert-overlay" id="alertOverlay">
+        <div class="alert-card" id="alertCard">
+            <div class="alert-icon" id="alertIcon">⚠️</div>
+            <div class="alert-title" id="alertTitle">Melding</div>
+            <div class="alert-message" id="alertMessage">Bericht</div>
+            <div class="alert-departure" id="alertDeparture">Vertrek: 08:00</div>
+            <div class="alert-countdown" id="alertCountdown">--:--</div>
+            <button class="alert-ok-btn" id="alertOkBtn" onclick="dismissAlert()">✅ Akkoord</button>
         </div>
     </div>
 </div>
@@ -408,255 +368,418 @@
 <script>
 (function() {
     const busLines = {
-        '54': { number:'54', destination:'Halte Busdepot', totalTime:12,
-            stops:[{name:'Medisch Centrum',time:0,type:'start'},{name:'Tijdelijke Halte Rotonde BD',time:2},{name:'Halte Museumplein',time:4},{name:'Halte Malherplein',time:6},{name:'Bus Station',time:8},{name:'Halte Europaweg',time:10},{name:'Halte Busdepot (eindpunt)',time:12,type:'end'}] },
-        '18': { number:'18', destination:'Leeuwarden Airport', totalTime:18,
-            stops:[{name:'Centraal Station',time:0,type:'start'},{name:'Halte Busdepot',time:2},{name:'Leeuwarden Airport',time:4},{name:'Bus Station',time:6},{name:'Halte Museumplein',time:8},{name:'Halte Malherplein',time:10},{name:'Halte Van Houtenlaan',time:12},{name:'Halte School',time:14},{name:'Halte Busdepot',time:16},{name:'Leeuwarden Airport (eindpunt)',time:18,type:'end'}] },
-        '27': { number:'27', destination:'Halte Busdepot', totalTime:16,
-            stops:[{name:'Halte Wijk Station',time:0,type:'start'},{name:'Halte Europaweg',time:2},{name:'Bus Station',time:4},{name:'Medisch Centrum',time:6},{name:'Halte Malherplein',time:8},{name:'Halte Museumplein',time:10},{name:'Halte Veldstraat',time:12},{name:'Halte School',time:14},{name:'Halte Busdepot (eindpunt)',time:16,type:'end'}] },
-        '42': { number:'42', destination:'Halte Busdepot', totalTime:24,
-            stops:[{name:'Halte Veldstraat',time:0,type:'start'},{name:'Halte Van Houtenlaan',time:2},{name:'Medisch Centrum',time:4},{name:'Tijdelijke Halte Rotonde BD',time:6},{name:'Bus Station',time:8},{name:'Centraal Station',time:10},{name:'Halte Europaweg',time:12},{name:'Tijdelijke Halte Rotonde BD',time:14},{name:'Medisch Centrum',time:16},{name:'Halte Van Houtenlaan',time:18},{name:'Halte School',time:20},{name:'Halte Busdepot',time:22},{name:'Halte Busdepot (eindpunt)',time:24,type:'end'}] }
+        '54': { number:'54', destination:'Halte Busdepot',
+            stops: [
+                {name:'Medisch Centrum', offset:0, type:'start'},
+                {name:'Tijdelijke Halte Rotonde BD', offset:2, type:'normal'},
+                {name:'Halte Museumplein', offset:4, type:'normal'},
+                {name:'Halte Malherplein', offset:6, type:'normal'},
+                {name:'Bus Station', offset:8, type:'normal'},
+                {name:'Halte Europaweg', offset:10, type:'normal'},
+                {name:'Halte Busdepot (eindpunt)', offset:12, type:'end'}
+            ]},
+        '18': { number:'18', destination:'Leeuwarden Airport',
+            stops: [
+                {name:'Centraal Station', offset:0, type:'start'},
+                {name:'Halte Busdepot', offset:2, type:'normal'},
+                {name:'Leeuwarden Airport', offset:4, type:'normal'},
+                {name:'Bus Station', offset:6, type:'normal'},
+                {name:'Halte Museumplein', offset:8, type:'normal'},
+                {name:'Halte Malherplein', offset:10, type:'normal'},
+                {name:'Halte Van Houtenlaan', offset:12, type:'normal'},
+                {name:'Halte School', offset:14, type:'normal'},
+                {name:'Halte Busdepot', offset:16, type:'normal'},
+                {name:'Leeuwarden Airport (eindpunt)', offset:18, type:'end'}
+            ]},
+        '27': { number:'27', destination:'Halte Busdepot',
+            stops: [
+                {name:'Halte Wijk Station', offset:0, type:'start'},
+                {name:'Halte Europaweg', offset:2, type:'normal'},
+                {name:'Bus Station', offset:4, type:'normal'},
+                {name:'Medisch Centrum', offset:6, type:'normal'},
+                {name:'Halte Malherplein', offset:8, type:'normal'},
+                {name:'Halte Museumplein', offset:10, type:'normal'},
+                {name:'Halte Veldstraat', offset:12, type:'normal'},
+                {name:'Halte School', offset:14, type:'normal'},
+                {name:'Halte Busdepot (eindpunt)', offset:16, type:'end'}
+            ]},
+        '42': { number:'42', destination:'Halte Busdepot',
+            stops: [
+                {name:'Halte Veldstraat', offset:0, type:'start'},
+                {name:'Halte Van Houtenlaan', offset:2, type:'normal'},
+                {name:'Medisch Centrum', offset:4, type:'normal'},
+                {name:'Tijdelijke Halte Rotonde BD', offset:6, type:'normal'},
+                {name:'Bus Station', offset:8, type:'normal'},
+                {name:'Centraal Station', offset:10, type:'normal'},
+                {name:'Halte Europaweg', offset:12, type:'normal'},
+                {name:'Tijdelijke Halte Rotonde BD', offset:14, type:'normal'},
+                {name:'Medisch Centrum', offset:16, type:'normal'},
+                {name:'Halte Van Houtenlaan', offset:18, type:'normal'},
+                {name:'Halte School', offset:20, type:'normal'},
+                {name:'Halte Busdepot', offset:22, type:'normal'},
+                {name:'Halte Busdepot (eindpunt)', offset:24, type:'end'}
+            ]}
     };
 
     let currentLine = '54';
+    let currentStops = busLines['54'].stops;
+    let startTime = null;
     let currentStopIndex = -1;
-    let departureReferenceTime = null;
-    let currentDelayMinutes = 0;
-    let manualOffset = 0;
+    let departureTime = null;
+    let delayMinutes = 0;
+    let alertActive = false;
+    let alertTimer = null;
+    let countdownTimer = null;
+    let clockTimer = null;
     let cart = [];
-    let nextStopTimer = null;
-    let countdownInterval = null;
-    let doorState = { front: false, rear: false };
-    let lightState = { interior: false, exterior: false };
 
     const $ = id => document.getElementById(id);
-    const elements = {
-        topLineNumber: $('topLineNumber'),
-        topDestination: $('topDestination'),
-        rightPanelTitle: $('rightPanelTitle'),
-        rightPanelContent: $('rightPanelContent'),
-        btnDepart: $('btnDepart'),
-        btnNext: $('btnNext'),
-        btnBack: $('btnBack'),
-        sidebarButtons: document.querySelectorAll('.sidebar-btn[data-line]'),
-        currentTimeEl: $('currentTime'),
-        currentDateEl: $('currentDate'),
-        delayValueEl: $('delayValue'),
-        delayIndicator: $('delayIndicator'),
-        statusSquare: $('statusSquare')
-    };
 
-    window.goToPage = function(pageName) {
-        if (nextStopTimer) { clearTimeout(nextStopTimer); nextStopTimer = null; }
-        if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        const pageMap = {
-            'home': 'pageHome',
-            'verkoop': 'pageVerkoop',
-            'chipkaart': 'pageChipkaart',
-            'abonnement': 'pageAbonnement',
-            'reizigers': 'pageReizigers',
-            'rapport': 'pageRapport',
-            'instellingen': 'pageInstellingen',
-            'deuren': 'pageDeuren',
-            'verlichting': 'pageVerlichting',
-            'omroep': 'pageOmroep'
-        };
-        const pageId = pageMap[pageName] || 'pageHome';
-        document.getElementById(pageId).classList.add('active');
-
-        if (pageName === 'home' && departureReferenceTime && currentStopIndex >= 0 && currentStopIndex < busLines[currentLine].stops.length-1) {
-            startCountdown();
-        }
-        if (pageName === 'chipkaart') document.getElementById('chipkaartResult').style.display = 'none';
-        if (pageName === 'abonnement') document.getElementById('abonnementResult').style.display = 'none';
-        if (pageName === 'deuren') updateDoorUI();
-        if (pageName === 'verlichting') updateLightUI();
-    };
-
-    window.toggleDoor = function(door) { doorState[door] = !doorState[door]; updateDoorUI(); speak(doorState[door] ? `${door==='front'?'Voorste':'Achterste'} deur geopend` : `${door==='front'?'Voorste':'Achterste'} deur gesloten`); };
-    window.closeAllDoors = function() { doorState.front = false; doorState.rear = false; updateDoorUI(); speak('Alle deuren gesloten'); };
-    function updateDoorUI() {
-        const fBtn = $('frontDoorOpen'), rBtn = $('rearDoorOpen');
-        if (fBtn) { fBtn.textContent = doorState.front ? '🔒 Sluiten' : '🔓 Openen'; fBtn.className = `function-btn action-btn ${doorState.front ? 'red' : 'green'}`; }
-        if (rBtn) { rBtn.textContent = doorState.rear ? '🔒 Sluiten' : '🔓 Openen'; rBtn.className = `function-btn action-btn ${doorState.rear ? 'red' : 'green'}`; }
-        const fStatus = $('frontDoorStatus'); if (fStatus) fStatus.textContent = doorState.front ? 'Open' : 'Gesloten';
-        const rStatus = $('rearDoorStatus'); if (rStatus) rStatus.textContent = doorState.rear ? 'Open' : 'Gesloten';
-    }
-    window.toggleLight = function(type) { lightState[type] = !lightState[type]; updateLightUI(); speak(lightState[type] ? `${type==='interior'?'Binnenverlichting':'Buitenverlichting'} aangezet` : `${type==='interior'?'Binnenverlichting':'Buitenverlichting'} uitgeschakeld`); };
-    function updateLightUI() {
-        const iBtn = $('interiorLightBtn'), eBtn = $('exteriorLightBtn');
-        if (iBtn) { iBtn.textContent = lightState.interior ? '💡 Uitschakelen' : '💡 Aanzetten'; iBtn.className = `function-btn action-btn ${lightState.interior ? 'red' : 'green'}`; }
-        if (eBtn) { eBtn.textContent = lightState.exterior ? '💡 Uitschakelen' : '💡 Aanzetten'; eBtn.className = `function-btn action-btn ${lightState.exterior ? 'red' : 'green'}`; }
-        const iStatus = $('interiorLightStatus'); if (iStatus) iStatus.textContent = lightState.interior ? 'Aan' : 'Uit';
-        const eStatus = $('exteriorLightStatus'); if (eStatus) eStatus.textContent = lightState.exterior ? 'Aan' : 'Uit';
-    }
-    window.playAnnouncement = function(type) { let m=''; switch(type) { case 'volgende_halte': m='De volgende halte is in aantocht.'; break; case 'eindbestemming': m='Wij naderen de eindbestemming.'; break; case 'deuren_sluiten': m='De deuren gaan sluiten. Houd afstand.'; break; } speak(m); };
-    window.playCustomAnnouncement = function() { const t = $('customAnnouncement').value; if(t.trim()) speak(t); else alert('Voer een bericht in.'); };
-
-    function speak(text) { if(!window.speechSynthesis) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='nl-NL'; u.rate=1.0; window.speechSynthesis.speak(u); }
-    function formatTime(date) { return String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0'); }
-    function formatTimeFull(date) { return formatTime(date)+':'+String(date.getSeconds()).padStart(2,'0'); }
-
-    function renderRoute(lineKey, highlightIdx) {
-        const line = busLines[lineKey];
-        elements.topLineNumber.textContent = 'Lijn '+line.number;
-        elements.topDestination.textContent = line.destination;
-        elements.rightPanelTitle.textContent = 'Route: Lijn '+line.number;
-        let html = '<div class="route-info-summary"><span class="badge">🕐 '+line.totalTime+' min</span><span class="badge">📍 '+line.stops.length+' haltes</span>';
-        if(departureReferenceTime) html += '<span class="badge">🚌 Vertrek '+formatTime(departureReferenceTime)+'</span><span class="badge">⏱ Afwijking '+(currentDelayMinutes>0?'+':'')+currentDelayMinutes+' min</span>';
-        html += '</div>';
-        line.stops.forEach((stop, idx) => {
-            let cls = 'stop-item'; if(stop.type==='start') cls+=' start'; if(stop.type==='end') cls+=' end'; if(idx===highlightIdx) cls+=' current'; if(idx<highlightIdx) cls+=' departed';
-            html += `<div class="${cls}"><span class="stop-num">${stop.type==='start'?'S':stop.type==='end'?'E':idx+1}</span><span class="stop-name">${stop.name}</span><span class="stop-time-info"><span class="stop-time">${stop.time} min</span>`;
-            if(departureReferenceTime) {
-                const adjusted = stop.time + currentDelayMinutes;
-                const predicted = new Date(departureReferenceTime.getTime() + adjusted*60000);
-                html += `<span class="stop-real-time">${formatTime(predicted)}</span>`;
-                if(idx===highlightIdx) {
-                    const diff = currentDelayMinutes;
-                    if(diff>0) html += '<span class="stop-deviation late">+'+diff+'</span>';
-                    else if(diff<0) html += '<span class="stop-deviation early">'+diff+'</span>';
-                    else html += '<span class="stop-deviation ontime">0</span>';
-                }
-            }
-            html += '</span></div>';
-        });
-        elements.rightPanelContent.innerHTML = html;
+    function getPlannedTime(stopIndex) {
+        if (!startTime) return null;
+        const offset = currentStops[stopIndex].offset;
+        return new Date(startTime.getTime() + offset * 60000);
     }
 
-    function updateStatusCountdown() {
-        const line = busLines[currentLine];
-        if (!departureReferenceTime || currentStopIndex < 0 || currentStopIndex >= line.stops.length - 1) {
-            const val = currentDelayMinutes;
-            let color, text;
-            if (val > 0) { color = 'red'; text = '+' + val.toFixed(1).replace(/\.0$/, ''); }
-            else if (val <= -1) { color = 'yellow'; text = val.toFixed(1).replace(/\.0$/, ''); }
-            else { color = 'green'; text = val === 0 ? '0' : val.toFixed(1).replace(/\.0$/, ''); }
-            elements.statusSquare.className = 'status-square ' + color;
-            elements.statusSquare.textContent = text;
-            return;
-        }
-        const nextStop = line.stops[currentStopIndex + 1];
-        const adjustedMinutes = nextStop.time + currentDelayMinutes;
-        const nextScheduled = new Date(departureReferenceTime.getTime() + adjustedMinutes * 60000);
-        const now = new Date();
-        const diffMs = nextScheduled - now;
-        const totalSeconds = Math.floor(diffMs / 1000);
-        const absSeconds = Math.abs(totalSeconds);
-        const mins = Math.floor(absSeconds / 60);
-        const secs = absSeconds % 60;
-        const displayTime = (totalSeconds < 0 ? '-' : '') + mins + ':' + String(secs).padStart(2, '0');
-        elements.statusSquare.className = 'status-square ' + (totalSeconds >= 0 ? 'green' : 'red');
-        elements.statusSquare.textContent = displayTime;
+    function formatTime(date) {
+        if (!date) return '--:--';
+        return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
     }
-
-    function startCountdown() {
-        if (countdownInterval) clearInterval(countdownInterval);
-        countdownInterval = setInterval(updateStatusCountdown, 1000);
-    }
-
-    function updateButtons() {
-        const line = busLines[currentLine]; const max = line?line.stops.length-1:-1;
-        elements.btnNext.disabled = (currentStopIndex===-1 || currentStopIndex>=max);
-        elements.btnBack.disabled = (currentStopIndex<=0);
-    }
-
-    function departRoute() {
-        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
-        departureReferenceTime = new Date();
-        currentStopIndex = 0;
-        currentDelayMinutes = manualOffset;
-        renderRoute(currentLine, currentStopIndex);
-        startCountdown();
-        speak('Vertrek vanaf '+busLines[currentLine].stops[0].name+'.');
-        updateButtons();
-    }
-    function nextStation() {
-        const line = busLines[currentLine];
-        if(currentStopIndex===-1){ speak('Druk eerst op Vertrek.'); return; }
-        if(currentStopIndex>=line.stops.length-1){ speak('Eindbestemming bereikt.'); return; }
-        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
-        currentStopIndex++;
-        const stop = line.stops[currentStopIndex];
-        const now = new Date();
-        const adjusted = stop.time + currentDelayMinutes;
-        const planned = new Date(departureReferenceTime.getTime() + adjusted*60000);
-        const diffMs = now - planned;
-        if(Math.abs(diffMs)>2000) {
-            const diffMin = diffMs/60000;
-            currentDelayMinutes += diffMin;
-            departureReferenceTime = new Date(now.getTime() - (stop.time + currentDelayMinutes)*60000);
-        }
-        renderRoute(currentLine, currentStopIndex);
-        if (currentStopIndex < line.stops.length-1) startCountdown(); else if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; updateStatusCountdown(); }
-        speak('Vertrek vanaf '+(line.stops[currentStopIndex-1]?line.stops[currentStopIndex-1].name:'')+'.');
-        nextStopTimer = setTimeout(() => {
-            if(currentStopIndex<line.stops.length-1) speak('Volgende halte: '+line.stops[currentStopIndex+1].name+'.');
-            else speak('U nadert de eindbestemming: '+stop.name+'.');
-        }, 30000);
-        updateButtons();
-    }
-    function backStation() {
-        const line = busLines[currentLine];
-        if(currentStopIndex<=0){ speak(currentStopIndex===0?'Al op eerste halte.':'Druk eerst op Vertrek.'); return; }
-        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
-        currentStopIndex--;
-        renderRoute(currentLine, currentStopIndex);
-        startCountdown();
-        speak('Terug naar '+line.stops[currentStopIndex].name+'.');
-        updateButtons();
-    }
-    function switchLine(lineKey) {
-        currentLine = lineKey; currentStopIndex = -1; departureReferenceTime = null; currentDelayMinutes = 0; manualOffset = 0;
-        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
-        if(countdownInterval){clearInterval(countdownInterval); countdownInterval=null;}
-        renderRoute(lineKey, -1); updateButtons();
-        elements.sidebarButtons.forEach(b => b.classList.toggle('active', b.dataset.line===lineKey));
-        updateStatusCountdown(); speak('Lijn '+busLines[lineKey].number+' geselecteerd.');
-    }
-    function updateDelayDisplay() { elements.delayValueEl.textContent = (manualOffset>0?'+':'')+manualOffset; }
-
-    elements.delayIndicator.addEventListener('click', () => {
-        const offsets = [1,0.5,0,-0.5,-1]; let idx = offsets.indexOf(manualOffset); if(idx===-1) idx=2;
-        idx = (idx+1)%offsets.length; manualOffset = offsets[idx]; updateDelayDisplay();
-        if(!departureReferenceTime) { currentDelayMinutes = manualOffset; updateStatusCountdown(); }
-        else speak('Handmatige afwijking kan alleen voor vertrek worden ingesteld.');
-    });
-
-    elements.sidebarButtons.forEach(b => b.addEventListener('click', () => switchLine(b.dataset.line)));
-    elements.btnDepart.addEventListener('click', departRoute);
-    elements.btnNext.addEventListener('click', nextStation);
-    elements.btnBack.addEventListener('click', backStation);
 
     function updateClock() {
         const now = new Date();
-        elements.currentTimeEl.textContent = formatTimeFull(now);
-        const m = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-        elements.currentDateEl.textContent = now.getDate()+' '+m[now.getMonth()]+' '+now.getFullYear();
+        $('clockTime').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+        const months = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+        $('clockDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        $('topDate').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
     }
 
-    window.addToCart = function(name, price) { cart.push({name,price}); renderCart(); speak(name + ' toegevoegd.'); };
+    function updateCountdownBadge() {
+        const badge = $('depBadge');
+        if (currentStopIndex === -1 && startTime) {
+            const now = new Date();
+            const diffMs = startTime - now;
+            if (diffMs <= 0) {
+                badge.textContent = 'NU VERTREKKEN!';
+                badge.className = 'departure-badge urgent';
+            } else {
+                const diffMin = Math.floor(diffMs / 60000);
+                const diffSec = Math.floor((diffMs % 60000) / 1000);
+                badge.textContent = `Vertrek over: ${String(diffMin).padStart(2,'0')}:${String(diffSec).padStart(2,'0')}`;
+                badge.className = diffMin <= 1 ? 'departure-badge urgent' : (diffMin <= 3 ? 'departure-badge warning' : 'departure-badge');
+            }
+        } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length - 1 && startTime) {
+            const nextStopTime = getPlannedTime(currentStopIndex + 1);
+            const now = new Date();
+            const diffMs = nextStopTime - now;
+            if (diffMs <= 0) {
+                badge.textContent = 'NU VERTREKKEN!';
+                badge.className = 'departure-badge urgent';
+            } else {
+                const diffMin = Math.floor(diffMs / 60000);
+                const diffSec = Math.floor((diffMs % 60000) / 1000);
+                badge.textContent = `Vertrek over: ${String(diffMin).padStart(2,'0')}:${String(diffSec).padStart(2,'0')}`;
+                badge.className = diffMin <= 1 ? 'departure-badge urgent' : (diffMin <= 3 ? 'departure-badge warning' : 'departure-badge');
+            }
+        } else {
+            badge.textContent = 'Vertrek over: --:--';
+            badge.className = 'departure-badge';
+        }
+    }
+
+    function renderStops() {
+        const list = $('stopList');
+        list.innerHTML = '';
+        currentStops.forEach((stop, idx) => {
+            const div = document.createElement('div');
+            div.className = 'stop-item';
+            if (idx === currentStopIndex) div.classList.add('current');
+            if (idx < currentStopIndex) div.classList.add('past');
+            if (stop.type === 'start') div.classList.add('start');
+            if (stop.type === 'end') div.classList.add('end');
+
+            const plannedTime = startTime ? getPlannedTime(idx) : null;
+            const timeStr = plannedTime ? formatTime(plannedTime) : '--:--';
+
+            let deviationHtml = '';
+            if (idx === currentStopIndex && delayMinutes !== 0) {
+                const devClass = delayMinutes > 0 ? 'late' : 'early';
+                const sign = delayMinutes > 0 ? '+' : '';
+                deviationHtml = `<span class="stop-deviation ${devClass}">${sign}${delayMinutes} min</span>`;
+            }
+
+            div.innerHTML = `
+                <span class="stop-name">${stop.name}</span>
+                <span class="stop-time">${timeStr}</span>
+                ${deviationHtml}
+            `;
+            list.appendChild(div);
+        });
+
+        if (currentStopIndex >= 0) {
+            const items = list.querySelectorAll('.stop-item');
+            if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function updateDelayBox() {
+        const box = $('delayBox');
+        if (currentStopIndex === -1) {
+            box.textContent = '0';
+            box.className = 'delay-box green';
+        } else {
+            const now = new Date();
+            const planned = getPlannedTime(currentStopIndex);
+            if (planned) {
+                const diffMs = now - planned;
+                delayMinutes = Math.round(diffMs / 60000);
+                box.textContent = delayMinutes === 0 ? '0' : (delayMinutes > 0 ? `+${delayMinutes}` : `${delayMinutes}`);
+                if (delayMinutes === 0) box.className = 'delay-box green';
+                else if (delayMinutes > 0) box.className = 'delay-box red';
+                else box.className = 'delay-box early';
+            }
+        }
+    }
+
+    function recalcDelay() { updateDelayBox(); }
+
+    window.setNow = function() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2,'0');
+        const m = String(now.getMinutes()).padStart(2,'0');
+        $('startTimeInput').value = `${h}:${m}`;
+        setStartTimeFromInput();
+    };
+
+    window.setStartTimeFromInput = function() {
+        const timeVal = $('startTimeInput').value;
+        if (!timeVal) return;
+        const [h, m] = timeVal.split(':');
+        const now = new Date();
+        startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
+        if (currentStopIndex === -1) {
+            renderStops();
+            updateCountdownBadge();
+        }
+    };
+
+    window.switchLine = function(lineKey) {
+        if (!busLines[lineKey]) return;
+        currentLine = lineKey;
+        currentStops = busLines[lineKey].stops;
+        currentStopIndex = -1;
+        startTime = null;
+        departureTime = null;
+        delayMinutes = 0;
+
+        $('lineNumber').textContent = `${busLines[lineKey].number} Geen Dienst`;
+        $('destination').textContent = busLines[lineKey].destination;
+        $('topLineNum').textContent = busLines[lineKey].number;
+        $('lineStatus').textContent = 'In dienst';
+        $('btnVertrek').disabled = false;
+        $('btnVolgende').disabled = true;
+        $('btnTerug').disabled = true;
+
+        document.querySelectorAll('[id^="lineBtn"]').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById(`lineBtn${lineKey}`);
+        if (btn) btn.classList.add('active');
+
+        updateDelayBox();
+        renderStops();
+        updateCountdownBadge();
+        setNow();
+    };
+
+    window.depart = function() {
+        setStartTimeFromInput();
+        if (!startTime) {
+            alert('Stel eerst een starttijd in.');
+            return;
+        }
+        currentStopIndex = 0;
+        departureTime = new Date();
+        const plannedStart = startTime;
+        const diffMs = departureTime - plannedStart;
+        delayMinutes = Math.round(diffMs / 60000);
+        updateDelayBox();
+
+        $('lineStatus').textContent = 'In dienst - Actief';
+        $('btnVertrek').disabled = true;
+        $('btnVolgende').disabled = false;
+        $('btnTerug').disabled = true;
+
+        renderStops();
+        updateCountdownBadge();
+        checkAlerts();
+
+        if (!countdownTimer) {
+            countdownTimer = setInterval(() => {
+                updateCountdownBadge();
+                if (!alertActive && currentStopIndex >= 0) {
+                    recalcDelay();
+                    if (delayMinutes >= 3) showAlert('late');
+                    else if (delayMinutes <= -3) showAlert('early');
+                }
+            }, 1000);
+        }
+    };
+
+    window.nextStop = function() {
+        if (currentStopIndex < 0 || currentStopIndex >= currentStops.length - 1) return;
+        currentStopIndex++;
+        recalcDelay();
+        $('btnTerug').disabled = false;
+        if (currentStopIndex === currentStops.length - 1) {
+            $('btnVolgende').disabled = true;
+            $('lineStatus').textContent = 'Eindbestemming bereikt';
+        }
+        renderStops();
+        updateCountdownBadge();
+        checkAlerts();
+    };
+
+    window.prevStop = function() {
+        if (currentStopIndex <= 0) return;
+        currentStopIndex--;
+        recalcDelay();
+        $('btnVolgende').disabled = false;
+        if (currentStopIndex === 0) {
+            $('btnTerug').disabled = true;
+        }
+        renderStops();
+        updateCountdownBadge();
+        checkAlerts();
+    };
+
+    function checkAlerts() {
+        if (alertActive) return;
+        if (delayMinutes >= 3) showAlert('late');
+        else if (delayMinutes <= -3) showAlert('early');
+    }
+
+    window.showAlert = function(type) {
+        if (alertActive) return;
+        alertActive = true;
+        const overlay = $('alertOverlay');
+        const icon = $('alertIcon');
+        const title = $('alertTitle');
+        const msg = $('alertMessage');
+        const dep = $('alertDeparture');
+        const count = $('alertCountdown');
+        const btn = $('alertOkBtn');
+
+        const plannedStartStr = startTime ? formatTime(startTime) : '--:--';
+        dep.textContent = `Geplande vertrek: ${plannedStartStr}`;
+        count.textContent = '--:--';
+
+        if (type === 'late') {
+            icon.textContent = '🚨';
+            title.textContent = 'Te laat!';
+            title.className = 'alert-title late';
+            msg.textContent = `De bus is ${delayMinutes} minuten te laat. Pas de dienstregeling aan.`;
+            btn.className = 'alert-ok-btn late-bg';
+        } else if (type === 'early') {
+            icon.textContent = '⏰';
+            title.textContent = 'Te vroeg!';
+            title.className = 'alert-title early';
+            msg.textContent = `De bus is ${Math.abs(delayMinutes)} minuten te vroeg. Wacht op de vertrektijd.`;
+            btn.className = 'alert-ok-btn early-bg';
+        } else {
+            icon.textContent = '🧪';
+            title.textContent = 'Testmelding';
+            title.className = 'alert-title';
+            title.style.color = 'var(--text-dark)';
+            msg.textContent = 'Dit is een test van het meldingssysteem. Alles werkt correct.';
+            btn.className = 'alert-ok-btn test-bg';
+        }
+
+        overlay.classList.add('show');
+
+        if (alertTimer) clearInterval(alertTimer);
+        alertTimer = setInterval(() => {
+            if (!alertActive) return;
+            const now = new Date();
+            if (startTime) {
+                const diffMs = startTime - now;
+                if (diffMs <= 0) {
+                    count.textContent = 'NU!';
+                    count.style.color = 'var(--red-alert)';
+                } else {
+                    const diffMin = Math.floor(diffMs / 60000);
+                    const diffSec = Math.floor((diffMs % 60000) / 1000);
+                    count.textContent = `${String(diffMin).padStart(2,'0')}:${String(diffSec).padStart(2,'0')}`;
+                }
+            }
+        }, 1000);
+    };
+
+    window.dismissAlert = function() {
+        alertActive = false;
+        if (alertTimer) { clearInterval(alertTimer); alertTimer = null; }
+        $('alertOverlay').classList.remove('show');
+        const titleEl = $('alertTitle');
+        if (titleEl) titleEl.style.color = '';
+    };
+
+    window.speak = function(text) {
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'nl-NL'; u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+    };
+
+    window.playCustom = function() {
+        const t = $('customAnnouncement')?.value;
+        if (t?.trim()) speak(t);
+        else alert('Voer een bericht in.');
+    };
+
+    window.addToCart = function(name, price) { cart.push({name, price}); renderCart(); };
     window.clearCart = function() { cart = []; renderCart(); };
-    window.payCart = function() { if(cart.length===0) return; const total = cart.reduce((s,i)=>s+i.price,0); alert('Betaling succesvol!\nTotaal: €'+total.toFixed(2).replace('.',',')); cart=[]; renderCart(); };
+    window.payCart = function() {
+        if (cart.length === 0) return;
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        alert('Betaling succesvol!\nTotaal: €' + total.toFixed(2).replace('.', ','));
+        cart = [];
+        renderCart();
+    };
     function renderCart() {
         const cartItems = $('cartItems'), cartTotal = $('cartTotal'), totalPrice = $('totalPrice'), payBtn = $('payBtn'), clearBtn = $('clearBtn');
-        if (cart.length === 0) { cartItems.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">Nog geen kaartjes geselecteerd</div>'; cartTotal.style.display='none'; payBtn.style.display='none'; clearBtn.style.display='none'; return; }
-        let html=''; let total=0;
-        cart.forEach(item => { total += item.price; html += `<div class="cart-item"><span>${item.name}</span><span>€${item.price.toFixed(2).replace('.',',')}</span></div>`; });
-        cartItems.innerHTML = html; totalPrice.textContent = '€'+total.toFixed(2).replace('.',','); cartTotal.style.display='flex'; payBtn.style.display='block'; clearBtn.style.display='block';
+        if (cart.length === 0) {
+            cartItems.innerHTML = '<div style="text-align:center;color:#888;padding:16px;">Nog geen kaartjes geselecteerd</div>';
+            cartTotal.style.display = 'none'; payBtn.style.display = 'none'; clearBtn.style.display = 'none';
+            return;
+        }
+        let html = ''; let total = 0;
+        cart.forEach(item => { total += item.price; html += `<div class="cart-item"><span>${item.name}</span><span>€${item.price.toFixed(2).replace('.', ',')}</span></div>`; });
+        cartItems.innerHTML = html;
+        totalPrice.textContent = '€' + total.toFixed(2).replace('.', ',');
+        cartTotal.style.display = 'flex'; payBtn.style.display = 'block'; clearBtn.style.display = 'block';
     }
-    window.simulateScan = function(type) { if(type==='chipkaart'){ $('chipkaartResult').style.display='block'; speak('Kaart gescand.'); } else { $('abonnementResult').style.display='block'; speak('Abonnement gevonden.'); } };
-    window.simulateLoad = function() { $('chipkaartText').innerHTML = 'Saldo: €34,50<br><strong>€10,00 opgeladen!</strong>'; speak('Kaart opgeladen.'); };
-    window.updatePassengers = function() { const count = Math.floor(Math.random()*40)+10; $('passengerCount').textContent = count; speak('Reizigers bijgewerkt naar '+count+'.'); };
+
+    window.goToPage = function(pageName) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const pageMap = { 'home': 'pageHome', 'verkoop': 'pageVerkoop', 'omroep': 'pageOmroep', 'instellingen': 'pageInstellingen' };
+        const pageId = pageMap[pageName] || 'pageHome';
+        document.getElementById(pageId).classList.add('active');
+        document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+        if (pageName === 'home') $('btnHoofdscherm').classList.add('active');
+        else if (pageName === 'verkoop') $('btnKaart').classList.add('active');
+        else if (pageName === 'omroep') $('btnOproep').classList.add('active');
+        else if (pageName === 'instellingen') $('btnMenu').classList.add('active');
+    };
 
     function init() {
-        manualOffset = 0; currentDelayMinutes = 0;
-        renderRoute(currentLine, -1); updateButtons(); updateClock(); setInterval(updateClock,1000);
-        updateDelayDisplay(); updateStatusCountdown();
+        updateClock();
+        clockTimer = setInterval(updateClock, 1000);
+        setNow();
+        renderStops();
+        updateDelayBox();
+        updateCountdownBadge();
+        document.getElementById('lineBtn54').classList.add('active');
     }
 
-    document.querySelectorAll('.tile').forEach(t => t.addEventListener('click', function() { this.style.transform='scale(0.92)'; setTimeout(()=>this.style.transform='',120); }));
     init();
 })();
 </script>
