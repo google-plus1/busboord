@@ -3,64 +3,730 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – Status Vierkant Gecorrigeerd</title>
+    <title>Arriva Boordcomputer – Uitgebreid met Extra Functies</title>
     <style>
-        /* (existing styles unchanged, only .status-square size updated) */
-        :root { /* same as before */ }
-        /* ... all other CSS rules are identical to the previous version, except the status-square dimensions */
-        .status-square {
-            width: 44px; height: 44px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 16px; color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-            flex-shrink: 0; transition: all 0.3s ease;
+        :root {
+            --screen-bg: #0A3D5C;
+            --topbar-bg: #073D5E;
+            --sidebar-bg: #1E8AB5;
+            --white: #FFFFFF;
+            --tile-orange: #D35400;
+            --tile-yellow: #D4AC0D;
+            --tile-green: #239B56;
+            --tile-darkblue: #154360;
+            --tile-red: #A93226;
+            --tile-darkgray: #2C3E50;
+            --btn-blue: #1F618D;
+            --btn-green: #1E8449;
+            --btn-gray: #5D6D7E;
+            --delay-btn-bg: #0F4F74;
         }
-        /* Responsive adjustments remain */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; width: 100vw; overflow: hidden; background: #000;
+            font-family: 'Segoe UI', 'Roboto', 'Inter', 'Open Sans', sans-serif;
+        }
+        .tablet-frame { width: 100vw; height: 100vh; background: var(--screen-bg); display: flex; flex-direction: column; overflow: hidden; }
+        .page { display: none; flex-direction: column; height: 100%; width: 100%; }
+        .page.active { display: flex; }
+
+        /* topbar etc. same as before */
+        .topbar { background: var(--topbar-bg); height: 10%; min-height: 56px; display: flex; align-items: center; padding: 0 12px; gap: 8px; flex-shrink: 0; z-index: 2; }
+        .topbar-left { display: flex; align-items: center; gap: 8px; }
+        .icon-btn { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; background: transparent; border: none; }
+        .icon-btn:hover { background: rgba(255,255,255,0.12); }
+        .icon-btn svg { width: 20px; height: 20px; fill: var(--white); }
+        .icon-btn.small svg { width: 16px; height: 16px; }
+        .topbar-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; }
+        .line-number { font-weight: 600; font-size: 22px; color: var(--white); background: rgba(255,255,255,0.08); padding: 5px 14px; border-radius: 8px; }
+        .destination { font-weight: 400; font-size: 18px; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .delay-indicator { background: var(--delay-btn-bg); color: var(--white); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-weight: 600; font-size: 16px; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 4px; }
+        .delay-indicator:hover { background: #1A5A7A; }
+        .delay-label { font-size: 12px; opacity: 0.8; margin-right: 2px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; color: var(--white); font-size: 13px; font-weight: 400; }
+        .topbar-right .time { font-weight: 600; font-size: 15px; }
+        .topbar-right .date { font-size: 12px; opacity: 0.9; }
+        .icon-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .icon-dot.gps { background: #2ECC71; box-shadow: 0 0 8px rgba(46,204,113,0.8); }
+        .icon-dot.network { background: #3498DB; box-shadow: 0 0 8px rgba(52,152,219,0.8); }
+
+        .status-square { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.35); flex-shrink: 0; transition: all 0.3s ease; }
+        .status-square.green { background: #27AE60; }
+        .status-square.yellow { background: #F39C12; }
+        .status-square.red { background: #E74C3C; }
+
+        .main-content { flex: 1; display: flex; min-height: 0; z-index: 1; overflow: hidden; }
+        .left-sidebar { width: 12%; min-width: 100px; background: var(--sidebar-bg); display: flex; flex-direction: column; align-items: center; padding: 8px 4px; gap: 2px; overflow-y: auto; }
+        .sidebar-btn { width: 48px; height: 48px; border-radius: 8px; background: var(--sidebar-bg); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; position: relative; flex-shrink: 0; }
+        .sidebar-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
+        .sidebar-btn.active { background: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.6); }
+        .sidebar-btn svg { width: 22px; height: 22px; fill: var(--white); }
+        .sidebar-btn .line-badge { position: absolute; bottom: 3px; right: 3px; background: var(--white); color: #0F4F74; font-size: 9px; font-weight: 700; width: 17px; height: 17px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .sidebar-divider { width: 70%; height: 1px; background: rgba(255,255,255,0.5); margin: 5px 0; border-radius: 1px; flex-shrink: 0; }
+
+        .middle-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px 10px; min-width: 0; overflow: auto; }
+        .tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr); /* now 3 rows to accommodate 9 tiles */
+            gap: 10px;
+            width: 100%;
+            max-width: 450px;
+        }
+        .tile {
+            aspect-ratio: 100 / 70;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.18s;
+            border: none;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 13px;
+            text-align: center;
+            gap: 4px;
+            padding: 6px 2px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .tile:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.4); filter: brightness(1.1); }
+        .tile:active { transform: scale(0.95); }
+        .tile svg { width: 22px; height: 22px; fill: var(--white); }
+        .tile span { font-size: 12px; line-height: 1.2; }
+        .tile.verkoop { background: var(--tile-orange); }
+        .tile.chipkaart { background: var(--tile-yellow); color: #2C3E50; }
+        .tile.chipkaart svg { fill: #2C3E50; }
+        .tile.abonnement { background: var(--tile-green); }
+        .tile.reizigers { background: var(--tile-darkblue); }
+        .tile.rapport { background: var(--tile-red); }
+        .tile.instellingen { background: var(--tile-darkgray); }
+        /* New tiles colors */
+        .tile.deuren { background: #8E44AD; }
+        .tile.verlichting { background: #F1C40F; color: #2C3E50; }
+        .tile.verlichting svg { fill: #2C3E50; }
+        .tile.omroep { background: #1ABC9C; }
+
+        .right-panel {
+            width: 35%;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            background: var(--screen-bg);
+            padding: 8px 10px 8px 6px;
+        }
+        .right-panel-header {
+            background: #0B5D86;
+            border-radius: 8px 8px 0 0;
+            padding: 10px 14px;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 19px;
+        }
+        .right-panel-content {
+            flex: 1;
+            background: var(--white);
+            border-radius: 0 0 8px 8px;
+            padding: 10px 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .route-info-summary {
+            display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;
+            font-size: 12px; color: #555; font-weight: 500;
+        }
+        .route-info-summary .badge {
+            background: #e8f4f8; padding: 3px 10px; border-radius: 14px;
+            font-weight: 600; color: #0F4F74;
+        }
+        .stop-item {
+            display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+            border-radius: 5px; font-size: 13px; color: #333; transition: background 0.12s;
+            border-left: 4px solid transparent;
+        }
+        .stop-item:hover { background: #f0f6fa; }
+        .stop-item.start { font-weight: 700; color: #0B5D86; border-left-color: #2ECC71; background: #f6fdf9; }
+        .stop-item.end { font-weight: 700; color: #C0392B; border-left-color: #C0392B; background: #fdf8f8; }
+        .stop-item.current { background: #d4eaf7; border-left-color: #F1C40F; font-weight: 700; box-shadow: 0 0 6px rgba(241,196,15,0.6); color: #0B3A5C; }
+        .stop-item.departed { opacity: 0.5; background: #f5f5f5; border-left-color: #95A5A6; }
+        .stop-num { width: 22px; height: 22px; border-radius: 50%; background: #e8f0f5; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #0F4F74; flex-shrink: 0; }
+        .stop-name { flex: 1; font-weight: 500; }
+        .stop-time-info { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 11px; }
+        .stop-deviation { font-weight: 700; padding: 1px 6px; border-radius: 8px; font-size: 10px; }
+        .stop-deviation.late { background: #fdeaea; color: #E74C3C; }
+        .stop-deviation.early { background: #e8f8f0; color: #27AE60; }
+        .stop-deviation.ontime { background: #e8f4f8; color: #0B5D86; }
+
+        .bottombar {
+            background: #073D5E;
+            height: 8%;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .bottombar-left, .bottombar-right { display: flex; align-items: center; gap: 6px; }
+        .bottombar-btn {
+            width: 36px; height: 36px; border-radius: 8px; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+            font-size: 16px; font-weight: bold; color: white;
+        }
+        .bottombar-btn:hover { filter: brightness(1.2); transform: scale(1.08); }
+        .bottombar-btn.blue { background: var(--btn-blue); }
+        .bottombar-btn.green { background: var(--btn-green); }
+        .bottombar-btn.gray { background: var(--btn-gray); }
+        .bottombar-label { color: var(--white); font-size: 12px; font-weight: 500; opacity: 0.85; margin: 0 6px; }
+        .route-control-btn {
+            padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 14px;
+            border: none; cursor: pointer; color: white; transition: all 0.15s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .route-control-btn.depart { background: #2ECC71; }
+        .route-control-btn.next { background: #3498DB; }
+        .route-control-btn.back { background: #95A5A6; }
+        .route-control-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(30%); }
+        .route-control-btn:not(:disabled):hover { filter: brightness(1.15); transform: scale(1.02); }
+
+        /* Verkoop, etc. same as before */
+        .verkoop-page, .info-page, .rapport-page, .instellingen-page { background: #f0f4f8; }
+        .verkoop-header {
+            background: var(--topbar-bg); color: white; padding: 14px 18px;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+        }
+        .verkoop-header h2 { font-size: 20px; font-weight: 600; }
+        .verkoop-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+        .ticket-section { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .ticket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .ticket-card { background: linear-gradient(135deg, #1E8AB5, #0B5D86); color: white; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; border: none; text-align: center; }
+        .ticket-card:hover { transform: translateY(-3px); }
+        .cart-section { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .info-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+        .info-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); width: 100%; max-width: 500px; text-align: center; }
+        .action-btn { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 12px; }
+        .action-btn.blue { background: #3498DB; color: white; }
+        .action-btn.green { background: #2ECC71; color: white; }
+        .action-btn.red { background: #E74C3C; color: white; }
+        .action-btn.orange { background: #E67E22; color: white; }
+        .action-btn:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .function-btn {
+            width: 100%;
+            padding: 14px;
+            margin: 6px 0;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .function-btn:hover { filter: brightness(1.1); transform: scale(1.01); }
+        .function-btn:active { transform: scale(0.98); }
+
+        .rapport-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .rapport-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .instellingen-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .settings-section { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .toggle-switch { width: 48px; height: 26px; background: #ccc; border-radius: 13px; position: relative; cursor: pointer; }
+        .toggle-switch.active { background: #2ECC71; }
+        .toggle-switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.3s; }
+        .toggle-switch.active::after { transform: translateX(22px); }
+        .settings-btn { padding: 10px 18px; border-radius: 8px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .settings-btn.blue { background: #3498DB; color: white; }
+        .settings-btn.red { background: #E74C3C; color: white; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c0c8d0; border-radius: 10px; }
+        @media (max-width: 768px) {
+            .right-panel { display: none; }
+            .tiles-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px; }
+        }
+        @media (max-width: 480px) {
+            .right-panel { display: none; }
+            .tiles-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(5, 1fr); }
+        }
     </style>
 </head>
 <body>
-    <!-- (HTML structure unchanged) -->
-    <script>
-    (function() {
-        // ... all previous code remains the same except the updateStatusSquare function and one line in init
+<div class="tablet-frame">
+    <!-- HOME PAGE -->
+    <div class="page active" id="pageHome">
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="icon-btn" title="Home"><svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h5v-7h6v7h5V9z"/></svg></button>
+                <button class="icon-btn small" title="Waarschuwing"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg></button>
+                <button class="icon-btn small" title="Info"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2"/><path d="M12 16v-4M12 8v-1.5" stroke="white" stroke-width="2.5" fill="none"/></svg></button>
+            </div>
+            <div class="topbar-center">
+                <span class="line-number" id="topLineNumber">Lijn 54</span>
+                <span class="destination" id="topDestination">Halte Busdepot</span>
+                <div class="status-square green" id="statusSquare">0</div>
+                <div class="delay-indicator" id="delayIndicator"><span class="delay-label">Afw</span> <span id="delayValue">0</span></div>
+            </div>
+            <div class="topbar-right">
+                <div class="date-time"><span class="time" id="currentTime">12:34</span><span class="date" id="currentDate">4 jul 2026</span></div>
+                <span class="icon-dot gps"></span><span class="icon-dot network"></span>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="left-sidebar">
+                <button class="sidebar-btn active" data-line="54"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">54</span></button>
+                <button class="sidebar-btn" data-line="18"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">18</span></button>
+                <button class="sidebar-btn" data-line="27"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">27</span></button>
+                <button class="sidebar-btn" data-line="42"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3" fill="white"/><circle cx="7" cy="20" r="2" fill="white"/><circle cx="17" cy="20" r="2" fill="white"/></svg><span class="line-badge">42</span></button>
+                <div class="sidebar-divider"></div>
+                <button class="sidebar-btn" title="Kaart"><svg viewBox="0 0 24 24"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg></button>
+                <button class="sidebar-btn" title="Klok"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="2"/><polyline points="12,7 12,12 16,14" fill="none" stroke="white" stroke-width="2"/></svg></button>
+                <button class="sidebar-btn" title="Meldingen"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></button>
+            </div>
+            <div class="middle-section">
+                <div class="tiles-grid">
+                    <!-- Existing 6 tiles -->
+                    <button class="tile verkoop" onclick="goToPage('verkoop')"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="7" fill="none" stroke="white" stroke-width="2.5"/><line x1="15" y1="15" x2="21" y2="21" stroke="white" stroke-width="3"/></svg><span>Verkoop</span></button>
+                    <button class="tile chipkaart" onclick="goToPage('chipkaart')"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="#2C3E50" stroke-width="2"/></svg><span>Chipkaart</span></button>
+                    <button class="tile abonnement" onclick="goToPage('abonnement')"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Abonnement</span></button>
+                    <button class="tile reizigers" onclick="goToPage('reizigers')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Reizigers</span></button>
+                    <button class="tile rapport" onclick="goToPage('rapport')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Rapport</span></button>
+                    <button class="tile instellingen" onclick="goToPage('instellingen')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="white" stroke-width="2.5"/></svg><span>Instellingen</span></button>
 
-        function updateStatusSquare() {
-            const sq = elements.statusSquare;
-            const val = currentDelayMinutes;
-            // Color mapping:
-            // Green: 0, -0.5 (>= -0.5 and <= 0)
-            // Yellow/Orange: -1 (<= -1)
-            // Red: any positive (>0)
-            let color, text;
-            if (val > 0) {
-                color = 'red';
-                text = '+' + val.toFixed(1).replace(/\.0$/, '');
-            } else if (val <= -1) {
-                color = 'yellow';
-                text = val.toFixed(1).replace(/\.0$/, '');
-            } else {
-                color = 'green';
-                if (val === 0) text = '0';
-                else text = val.toFixed(1).replace(/\.0$/, ''); // for -0.5 shows "-0.5"
+                    <!-- New 3 function tiles -->
+                    <button class="tile deuren" onclick="goToPage('deuren')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="18" rx="1" fill="none" stroke="white" stroke-width="2"/><rect x="13" y="3" width="8" height="18" rx="1" fill="none" stroke="white" stroke-width="2"/><circle cx="7" cy="12" r="1" fill="white"/><circle cx="17" cy="12" r="1" fill="white"/></svg><span>Deuren</span></button>
+                    <button class="tile verlichting" onclick="goToPage('verlichting')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke="#2C3E50" stroke-width="2"/><line x1="12" y1="2" x2="12" y2="7" stroke="#2C3E50" stroke-width="2"/></svg><span>Verlichting</span></button>
+                    <button class="tile omroep" onclick="goToPage('omroep')"><svg viewBox="0 0 24 24"><path d="M12 2L8 9H3v6h5l4 7V2z" fill="none" stroke="white" stroke-width="2"/></svg><span>Omroep</span></button>
+                </div>
+            </div>
+            <div class="right-panel">
+                <div class="right-panel-header" id="rightPanelTitle">Route: Lijn 54</div>
+                <div class="right-panel-content" id="rightPanelContent"></div>
+            </div>
+        </div>
+        <div class="bottombar">
+            <div class="bottombar-left">
+                <button class="bottombar-btn blue"><svg viewBox="0 0 24 24"><polygon points="12,2 22,21 2,21" fill="white"/></svg></button>
+                <button class="bottombar-btn gray"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button>
+                <span class="bottombar-label">Arriva</span>
+                <button class="bottombar-btn green"><svg viewBox="0 0 24 24"><polyline points="5,13 10,18 19,6" fill="none" stroke="white" stroke-width="3"/></svg></button>
+                <button class="bottombar-btn blue"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6" stroke="white" stroke-width="2.5"/></svg></button>
+            </div>
+            <div class="bottombar-right">
+                <button class="route-control-btn depart" id="btnDepart">🚌 Vertrek</button>
+                <button class="route-control-btn next" id="btnNext">⏭ Volgende</button>
+                <button class="route-control-btn back" id="btnBack">⏮ Terug</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DEUREN PAGE -->
+    <div class="page info-page" id="pageDeuren">
+        <div class="verkoop-header">
+            <button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button>
+            <h2>🚪 Deuren</h2>
+        </div>
+        <div class="info-content">
+            <div class="info-card">
+                <h3>Voorste deur</h3>
+                <button class="function-btn action-btn green" id="frontDoorOpen" onclick="toggleDoor('front')">🔓 Openen</button>
+                <p id="frontDoorStatus" style="font-weight:bold;">Gesloten</p>
+            </div>
+            <div class="info-card">
+                <h3>Achterste deur</h3>
+                <button class="function-btn action-btn green" id="rearDoorOpen" onclick="toggleDoor('rear')">🔓 Openen</button>
+                <p id="rearDoorStatus" style="font-weight:bold;">Gesloten</p>
+            </div>
+            <div class="info-card">
+                <button class="function-btn action-btn red" onclick="closeAllDoors()">🔐 Alle deuren sluiten</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VERLICHTING PAGE -->
+    <div class="page info-page" id="pageVerlichting">
+        <div class="verkoop-header">
+            <button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button>
+            <h2>💡 Verlichting</h2>
+        </div>
+        <div class="info-content">
+            <div class="info-card">
+                <h3>Binnenverlichting</h3>
+                <button class="function-btn action-btn green" id="interiorLightBtn" onclick="toggleLight('interior')">💡 Aanzetten</button>
+                <p id="interiorLightStatus">Uit</p>
+            </div>
+            <div class="info-card">
+                <h3>Buitenverlichting</h3>
+                <button class="function-btn action-btn green" id="exteriorLightBtn" onclick="toggleLight('exterior')">💡 Aanzetten</button>
+                <p id="exteriorLightStatus">Uit</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- OMROEP PAGE -->
+    <div class="page info-page" id="pageOmroep">
+        <div class="verkoop-header">
+            <button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button>
+            <h2>📢 Omroep</h2>
+        </div>
+        <div class="info-content">
+            <div class="info-card">
+                <h3>Standaard Omroepberichten</h3>
+                <button class="function-btn action-btn blue" onclick="playAnnouncement('volgende_halte')">🚏 Volgende halte</button>
+                <button class="function-btn action-btn blue" onclick="playAnnouncement('eindbestemming')">🏁 Eindbestemming</button>
+                <button class="function-btn action-btn blue" onclick="playAnnouncement('deuren_sluiten')">🔒 Deuren sluiten</button>
+            </div>
+            <div class="info-card">
+                <h3>Eigen Omroep</h3>
+                <textarea id="customAnnouncement" rows="3" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc;" placeholder="Typ uw bericht..."></textarea>
+                <button class="function-btn action-btn orange" onclick="playCustomAnnouncement()">📢 Verzenden</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other pages remain same as before (Verkoop, Chipkaart, Abonnement, Reizigers, Rapport, Instellingen) -->
+    <!-- (For brevity, I include them as identical to the previous version, with only minor adjustments for the new tile entries) -->
+    <div class="page verkoop-page" id="pageVerkoop">
+        <div class="verkoop-header">
+            <button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button>
+            <h2>🎫 Kaartjes Verkopen</h2>
+        </div>
+        <div class="verkoop-content">
+            <div class="ticket-section">
+                <h3>🚌 Buskaartjes</h3>
+                <div class="ticket-grid">
+                    <button class="ticket-card" onclick="addToCart('Enkele reis', 3.50)"><span class="ticket-icon">🎫</span><span class="ticket-name">Enkele reis</span><span class="ticket-price">€3,50</span></button>
+                    <button class="ticket-card orange" onclick="addToCart('Retour', 6.00)"><span class="ticket-icon">🔄</span><span class="ticket-name">Retour</span><span class="ticket-price">€6,00</span></button>
+                    <button class="ticket-card green" onclick="addToCart('Dagkaart', 9.50)"><span class="ticket-icon">☀️</span><span class="ticket-name">Dagkaart</span><span class="ticket-price">€9,50</span></button>
+                    <button class="ticket-card purple" onclick="addToCart('Groepskaart (5p)', 15.00)"><span class="ticket-icon">👥</span><span class="ticket-name">Groepskaart 5p</span><span class="ticket-price">€15,00</span></button>
+                </div>
+            </div>
+            <div class="cart-section">
+                <h3>🛒 Winkelwagen</h3>
+                <div class="cart-items" id="cartItems"><div style="text-align:center;color:#888;padding:20px;">Nog geen kaartjes geselecteerd</div></div>
+                <div class="cart-total" id="cartTotal" style="display:none;"><span>Totaal</span><span id="totalPrice">€0,00</span></div>
+                <button class="pay-btn" id="payBtn" onclick="payCart()" style="display:none;">💳 Afrekenen</button>
+                <button class="clear-btn" id="clearBtn" onclick="clearCart()" style="display:none;">🗑️ Leegmaken</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="page info-page" id="pageChipkaart">
+        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>💳 Chipkaart</h2></div>
+        <div class="info-content">
+            <div class="info-card"><div class="big-icon">💳</div><h3>OV-chipkaart Services</h3><p>Scan een OV-chipkaart om saldo te controleren of op te laden.</p><button class="action-btn blue" onclick="simulateScan('chipkaart')">📡 Chipkaart Scannen</button></div>
+            <div class="info-card" id="chipkaartResult" style="display:none;"><div class="big-icon">✅</div><h3>Kaart Gescand</h3><p id="chipkaartText">Saldo: €24,50<br>Laatste rit: Lijn 54<br>Kaartnummer: 3528 **** **** 4912</p><button class="action-btn green" onclick="simulateLoad('chipkaart')">💰 €10,00 Opladen</button></div>
+        </div>
+    </div>
+
+    <div class="page info-page" id="pageAbonnement">
+        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>📋 Abonnementen</h2></div>
+        <div class="info-content">
+            <div class="info-card"><div class="big-icon">📋</div><h3>Abonnement Services</h3><p>Controleer abonnementen en verlengingen.</p><button class="action-btn blue" onclick="simulateScan('abonnement')">🔍 Abonnement Controleren</button></div>
+            <div class="info-card" id="abonnementResult" style="display:none;"><div class="big-icon">✅</div><h3>Abonnement Gevonden</h3><p id="abonnementText">Type: Maandabonnement Bus<br>Geldig tot: 31 juli 2026</p><button class="action-btn orange" onclick="alert('Verlenging verwerkt!')">🔄 Verlengen</button></div>
+        </div>
+    </div>
+
+    <div class="page info-page" id="pageReizigers">
+        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>👥 Reizigers</h2></div>
+        <div class="info-content">
+            <div class="info-card"><div class="big-icon">👥</div><h3>Reizigers Informatie</h3><p>Aantal reizigers: <strong id="passengerCount">24</strong></p><button class="action-btn blue" onclick="updatePassengers()">🔄 Aantal Bijwerken</button></div>
+        </div>
+    </div>
+
+    <div class="page rapport-page" id="pageRapport">
+        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>📊 Rapportages</h2></div>
+        <div class="rapport-content">
+            <div class="rapport-card"><h3>📈 Dagstatistieken</h3><div class="stat-grid"><div class="stat-box"><div class="stat-value">142</div><div class="stat-label">Verkochte kaartjes</div></div><div class="stat-box"><div class="stat-value">€487</div><div class="stat-label">Omzet vandaag</div></div></div></div>
+        </div>
+    </div>
+
+    <div class="page instellingen-page" id="pageInstellingen">
+        <div class="verkoop-header"><button class="icon-btn" onclick="goToPage('home')"><svg viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20" fill="none" stroke="white" stroke-width="3"/></svg></button><h2>⚙️ Instellingen</h2></div>
+        <div class="instellingen-content">
+            <div class="settings-section"><h3>🔊 Audio</h3><div class="setting-row"><div><div class="setting-label">Spraakomroepen</div></div><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div></div>
+            <div class="settings-section"><h3>⚡ Acties</h3><div class="setting-row"><button class="settings-btn blue" onclick="alert('Data gesynchroniseerd!')">🔄 Sync</button><button class="settings-btn red" onclick="if(confirm('Weet je het zeker?')) alert('App gereset!')">🗑️ Reset</button></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // Bus data and core logic identical to previous version
+    const busLines = {
+        '54': { number:'54', destination:'Halte Busdepot', totalTime:12,
+            stops:[{name:'Medisch Centrum',time:0,type:'start'},{name:'Tijdelijke Halte Rotonde BD',time:2},{name:'Halte Museumplein',time:4},{name:'Halte Malherplein',time:6},{name:'Bus Station',time:8},{name:'Halte Europaweg',time:10},{name:'Halte Busdepot (eindpunt)',time:12,type:'end'}] },
+        '18': { number:'18', destination:'Leeuwarden Airport', totalTime:18,
+            stops:[{name:'Centraal Station',time:0,type:'start'},{name:'Halte Busdepot',time:2},{name:'Leeuwarden Airport',time:4},{name:'Bus Station',time:6},{name:'Halte Museumplein',time:8},{name:'Halte Malherplein',time:10},{name:'Halte Van Houtenlaan',time:12},{name:'Halte School',time:14},{name:'Halte Busdepot',time:16},{name:'Leeuwarden Airport (eindpunt)',time:18,type:'end'}] },
+        '27': { number:'27', destination:'Halte Busdepot', totalTime:16,
+            stops:[{name:'Halte Wijk Station',time:0,type:'start'},{name:'Halte Europaweg',time:2},{name:'Bus Station',time:4},{name:'Medisch Centrum',time:6},{name:'Halte Malherplein',time:8},{name:'Halte Museumplein',time:10},{name:'Halte Veldstraat',time:12},{name:'Halte School',time:14},{name:'Halte Busdepot (eindpunt)',time:16,type:'end'}] },
+        '42': { number:'42', destination:'Halte Busdepot', totalTime:24,
+            stops:[{name:'Halte Veldstraat',time:0,type:'start'},{name:'Halte Van Houtenlaan',time:2},{name:'Medisch Centrum',time:4},{name:'Tijdelijke Halte Rotonde BD',time:6},{name:'Bus Station',time:8},{name:'Centraal Station',time:10},{name:'Halte Europaweg',time:12},{name:'Tijdelijke Halte Rotonde BD',time:14},{name:'Medisch Centrum',time:16},{name:'Halte Van Houtenlaan',time:18},{name:'Halte School',time:20},{name:'Halte Busdepot',time:22},{name:'Halte Busdepot (eindpunt)',time:24,type:'end'}] }
+    };
+
+    let currentLine = '54';
+    let currentStopIndex = -1;
+    let departureReferenceTime = null;
+    let currentDelayMinutes = 0;
+    let manualOffset = 0;
+    let cart = [];
+    let nextStopTimer = null;
+
+    // Door and light states
+    let doorState = { front: false, rear: false };
+    let lightState = { interior: false, exterior: false };
+
+    const elements = {
+        topLineNumber: document.getElementById('topLineNumber'),
+        topDestination: document.getElementById('topDestination'),
+        rightPanelTitle: document.getElementById('rightPanelTitle'),
+        rightPanelContent: document.getElementById('rightPanelContent'),
+        btnDepart: document.getElementById('btnDepart'),
+        btnNext: document.getElementById('btnNext'),
+        btnBack: document.getElementById('btnBack'),
+        sidebarButtons: document.querySelectorAll('.sidebar-btn[data-line]'),
+        currentTimeEl: document.getElementById('currentTime'),
+        currentDateEl: document.getElementById('currentDate'),
+        delayValueEl: document.getElementById('delayValue'),
+        delayIndicator: document.getElementById('delayIndicator'),
+        statusSquare: document.getElementById('statusSquare')
+    };
+
+    window.goToPage = function(pageName) {
+        if (nextStopTimer) { clearTimeout(nextStopTimer); nextStopTimer = null; }
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        switch(pageName) {
+            case 'home': document.getElementById('pageHome').classList.add('active'); break;
+            case 'verkoop': document.getElementById('pageVerkoop').classList.add('active'); break;
+            case 'chipkaart': document.getElementById('pageChipkaart').classList.add('active'); document.getElementById('chipkaartResult').style.display = 'none'; break;
+            case 'abonnement': document.getElementById('pageAbonnement').classList.add('active'); document.getElementById('abonnementResult').style.display = 'none'; break;
+            case 'reizigers': document.getElementById('pageReizigers').classList.add('active'); break;
+            case 'rapport': document.getElementById('pageRapport').classList.add('active'); break;
+            case 'instellingen': document.getElementById('pageInstellingen').classList.add('active'); break;
+            case 'deuren': document.getElementById('pageDeuren').classList.add('active'); updateDoorUI(); break;
+            case 'verlichting': document.getElementById('pageVerlichting').classList.add('active'); updateLightUI(); break;
+            case 'omroep': document.getElementById('pageOmroep').classList.add('active'); break;
+        }
+    };
+
+    // Door control
+    window.toggleDoor = function(door) {
+        doorState[door] = !doorState[door];
+        updateDoorUI();
+        const msg = doorState[door] ? `${door === 'front' ? 'Voorste' : 'Achterste'} deur geopend` : `${door === 'front' ? 'Voorste' : 'Achterste'} deur gesloten`;
+        speak(msg);
+    };
+    window.closeAllDoors = function() {
+        doorState.front = false;
+        doorState.rear = false;
+        updateDoorUI();
+        speak('Alle deuren gesloten');
+    };
+    function updateDoorUI() {
+        const frontBtn = document.getElementById('frontDoorOpen');
+        const rearBtn = document.getElementById('rearDoorOpen');
+        const frontStatus = document.getElementById('frontDoorStatus');
+        const rearStatus = document.getElementById('rearDoorStatus');
+        if (frontBtn) {
+            frontBtn.textContent = doorState.front ? '🔒 Sluiten' : '🔓 Openen';
+            frontBtn.className = `function-btn action-btn ${doorState.front ? 'red' : 'green'}`;
+        }
+        if (rearBtn) {
+            rearBtn.textContent = doorState.rear ? '🔒 Sluiten' : '🔓 Openen';
+            rearBtn.className = `function-btn action-btn ${doorState.rear ? 'red' : 'green'}`;
+        }
+        if (frontStatus) frontStatus.textContent = doorState.front ? 'Open' : 'Gesloten';
+        if (rearStatus) rearStatus.textContent = doorState.rear ? 'Open' : 'Gesloten';
+    }
+
+    // Light control
+    window.toggleLight = function(type) {
+        lightState[type] = !lightState[type];
+        updateLightUI();
+        const msg = lightState[type] ? `${type === 'interior' ? 'Binnenverlichting' : 'Buitenverlichting'} aangezet` : `${type === 'interior' ? 'Binnenverlichting' : 'Buitenverlichting'} uitgeschakeld`;
+        speak(msg);
+    };
+    function updateLightUI() {
+        const intBtn = document.getElementById('interiorLightBtn');
+        const extBtn = document.getElementById('exteriorLightBtn');
+        const intStat = document.getElementById('interiorLightStatus');
+        const extStat = document.getElementById('exteriorLightStatus');
+        if (intBtn) {
+            intBtn.textContent = lightState.interior ? '💡 Uitschakelen' : '💡 Aanzetten';
+            intBtn.className = `function-btn action-btn ${lightState.interior ? 'red' : 'green'}`;
+        }
+        if (extBtn) {
+            extBtn.textContent = lightState.exterior ? '💡 Uitschakelen' : '💡 Aanzetten';
+            extBtn.className = `function-btn action-btn ${lightState.exterior ? 'red' : 'green'}`;
+        }
+        if (intStat) intStat.textContent = lightState.interior ? 'Aan' : 'Uit';
+        if (extStat) extStat.textContent = lightState.exterior ? 'Aan' : 'Uit';
+    }
+
+    // PA system
+    window.playAnnouncement = function(type) {
+        let msg = '';
+        switch(type) {
+            case 'volgende_halte': msg = 'De volgende halte is in aantocht.'; break;
+            case 'eindbestemming': msg = 'Wij naderen de eindbestemming. Vergeet niet uit te checken.'; break;
+            case 'deuren_sluiten': msg = 'De deuren gaan sluiten. Houd afstand.'; break;
+        }
+        speak(msg);
+    };
+    window.playCustomAnnouncement = function() {
+        const text = document.getElementById('customAnnouncement').value;
+        if (text.trim()) speak(text);
+        else alert('Voer een bericht in.');
+    };
+
+    // Core bus functions unchanged
+    function speak(text) { if(!window.speechSynthesis) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='nl-NL'; u.rate=1.0; window.speechSynthesis.speak(u); }
+    function formatTime(date) { return String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0'); }
+    function formatTimeFull(date) { return formatTime(date)+':'+String(date.getSeconds()).padStart(2,'0'); }
+
+    function renderRoute(lineKey, highlightIdx) {
+        const line = busLines[lineKey];
+        elements.topLineNumber.textContent = 'Lijn '+line.number;
+        elements.topDestination.textContent = line.destination;
+        elements.rightPanelTitle.textContent = 'Route: Lijn '+line.number;
+        let html = '<div class="route-info-summary"><span class="badge">🕐 '+line.totalTime+' min</span><span class="badge">📍 '+line.stops.length+' haltes</span>';
+        if(departureReferenceTime) html += '<span class="badge">🚌 Vertrek '+formatTime(departureReferenceTime)+'</span><span class="badge">⏱ Afwijking '+(currentDelayMinutes>0?'+':'')+currentDelayMinutes+' min</span>';
+        html += '</div>';
+        line.stops.forEach((stop, idx) => {
+            let cls = 'stop-item'; if(stop.type==='start') cls+=' start'; if(stop.type==='end') cls+=' end'; if(idx===highlightIdx) cls+=' current'; if(idx<highlightIdx) cls+=' departed';
+            html += `<div class="${cls}"><span class="stop-num">${stop.type==='start'?'S':stop.type==='end'?'E':idx+1}</span><span class="stop-name">${stop.name}</span><span class="stop-time-info"><span class="stop-time">${stop.time} min</span>`;
+            if(departureReferenceTime) {
+                const adjusted = stop.time + currentDelayMinutes;
+                const predicted = new Date(departureReferenceTime.getTime() + adjusted*60000);
+                html += `<span class="stop-real-time">${formatTime(predicted)}</span>`;
+                if(idx===highlightIdx) {
+                    const diff = currentDelayMinutes;
+                    if(diff>0) html += '<span class="stop-deviation late">+'+diff+'</span>';
+                    else if(diff<0) html += '<span class="stop-deviation early">'+diff+'</span>';
+                    else html += '<span class="stop-deviation ontime">0</span>';
+                }
             }
-            sq.className = 'status-square ' + color;
-            sq.textContent = text;
-        }
+            html += '</span></div>';
+        });
+        elements.rightPanelContent.innerHTML = html;
+    }
 
-        // In init() set square initial state
-        function init() {
-            manualOffset = 0;
-            currentDelayMinutes = 0;
-            renderRoute(currentLine, -1);
-            updateButtons();
-            updateClock();
-            setInterval(updateClock, 1000);
-            updateDelayDisplay();
-            updateStatusSquare();  // initial green 0
-        }
+    function updateStatusSquare() {
+        const val = currentDelayMinutes;
+        let color, text;
+        if (val > 0) { color = 'red'; text = '+' + val.toFixed(1).replace(/\.0$/, ''); }
+        else if (val <= -1) { color = 'yellow'; text = val.toFixed(1).replace(/\.0$/, ''); }
+        else { color = 'green'; text = val === 0 ? '0' : val.toFixed(1).replace(/\.0$/, ''); }
+        elements.statusSquare.className = 'status-square ' + color;
+        elements.statusSquare.textContent = text;
+    }
 
-        // ... rest of the script unchanged
-    })();
-    </script>
+    function updateButtons() {
+        const line = busLines[currentLine]; const max = line?line.stops.length-1:-1;
+        elements.btnNext.disabled = (currentStopIndex===-1 || currentStopIndex>=max);
+        elements.btnBack.disabled = (currentStopIndex<=0);
+        elements.btnDepart.disabled = false;
+    }
+    function departRoute() {
+        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
+        departureReferenceTime = new Date();
+        currentStopIndex = 0;
+        currentDelayMinutes = manualOffset;
+        renderRoute(currentLine, currentStopIndex);
+        updateStatusSquare();
+        speak('Vertrek vanaf '+busLines[currentLine].stops[0].name+'.');
+        updateButtons();
+    }
+    function nextStation() {
+        const line = busLines[currentLine];
+        if(currentStopIndex===-1){ speak('Druk eerst op Vertrek.'); return; }
+        if(currentStopIndex>=line.stops.length-1){ speak('Eindbestemming bereikt.'); return; }
+        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
+        currentStopIndex++;
+        const stop = line.stops[currentStopIndex];
+        const now = new Date();
+        const adjusted = stop.time + currentDelayMinutes;
+        const planned = new Date(departureReferenceTime.getTime() + adjusted*60000);
+        const diffMs = now - planned;
+        if(Math.abs(diffMs)>2000) {
+            const diffMin = diffMs/60000;
+            currentDelayMinutes += diffMin;
+            departureReferenceTime = new Date(now.getTime() - (stop.time + currentDelayMinutes)*60000);
+        }
+        renderRoute(currentLine, currentStopIndex);
+        updateStatusSquare();
+        speak('Vertrek vanaf '+(line.stops[currentStopIndex-1]?line.stops[currentStopIndex-1].name:'')+'.');
+        nextStopTimer = setTimeout(() => {
+            if(currentStopIndex<line.stops.length-1) speak('Volgende halte: '+line.stops[currentStopIndex+1].name+'.');
+            else speak('U nadert de eindbestemming: '+stop.name+'.');
+        }, 30000);
+        updateButtons();
+    }
+    function backStation() {
+        const line = busLines[currentLine];
+        if(currentStopIndex<=0){ speak(currentStopIndex===0?'Al op eerste halte.':'Druk eerst op Vertrek.'); return; }
+        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
+        currentStopIndex--;
+        renderRoute(currentLine, currentStopIndex);
+        updateStatusSquare();
+        speak('Terug naar '+line.stops[currentStopIndex].name+'.');
+        updateButtons();
+    }
+    function switchLine(lineKey) {
+        currentLine = lineKey; currentStopIndex = -1; departureReferenceTime = null; currentDelayMinutes = 0; manualOffset = 0;
+        if(nextStopTimer){clearTimeout(nextStopTimer); nextStopTimer=null;}
+        renderRoute(lineKey, -1); updateButtons();
+        elements.sidebarButtons.forEach(b => b.classList.toggle('active', b.dataset.line===lineKey));
+        updateStatusSquare(); speak('Lijn '+busLines[lineKey].number+' geselecteerd.');
+    }
+    function updateDelayDisplay() { elements.delayValueEl.textContent = (manualOffset>0?'+':'')+manualOffset; }
+
+    elements.delayIndicator.addEventListener('click', () => {
+        const offsets = [1,0.5,0,-0.5,-1]; let idx = offsets.indexOf(manualOffset); if(idx===-1) idx=2;
+        idx = (idx+1)%offsets.length; manualOffset = offsets[idx]; updateDelayDisplay();
+        if(!departureReferenceTime) { currentDelayMinutes = manualOffset; updateStatusSquare(); }
+        else speak('Handmatige afwijking kan alleen voor vertrek worden ingesteld.');
+    });
+
+    elements.sidebarButtons.forEach(b => b.addEventListener('click', () => switchLine(b.dataset.line)));
+    elements.btnDepart.addEventListener('click', departRoute);
+    elements.btnNext.addEventListener('click', nextStation);
+    elements.btnBack.addEventListener('click', backStation);
+
+    function updateClock() {
+        const now = new Date();
+        elements.currentTimeEl.textContent = formatTimeFull(now);
+        const m = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+        elements.currentDateEl.textContent = now.getDate()+' '+m[now.getMonth()]+' '+now.getFullYear();
+    }
+
+    // Cart, scan, passengers functions (same as before, included for completeness)
+    window.addToCart = function(name, price) { cart.push({name,price}); renderCart(); speak(name + ' toegevoegd.'); };
+    window.clearCart = function() { cart = []; renderCart(); };
+    window.payCart = function() { if(cart.length===0) return; const total = cart.reduce((s,i)=>s+i.price,0); alert('Betaling succesvol!\nTotaal: €'+total.toFixed(2).replace('.',',')); cart=[]; renderCart(); };
+    function renderCart() {
+        const cartItems = document.getElementById('cartItems'), cartTotal = document.getElementById('cartTotal'), totalPrice = document.getElementById('totalPrice'), payBtn = document.getElementById('payBtn'), clearBtn = document.getElementById('clearBtn');
+        if (cart.length === 0) { cartItems.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">Nog geen kaartjes geselecteerd</div>'; cartTotal.style.display='none'; payBtn.style.display='none'; clearBtn.style.display='none'; return; }
+        let html=''; let total=0;
+        cart.forEach(item => { total += item.price; html += `<div class="cart-item"><span>${item.name}</span><span>€${item.price.toFixed(2).replace('.',',')}</span></div>`; });
+        cartItems.innerHTML = html; totalPrice.textContent = '€'+total.toFixed(2).replace('.',','); cartTotal.style.display='flex'; payBtn.style.display='block'; clearBtn.style.display='block';
+    }
+    window.simulateScan = function(type) { if(type==='chipkaart'){ document.getElementById('chipkaartResult').style.display='block'; speak('Kaart gescand.'); } else { document.getElementById('abonnementResult').style.display='block'; speak('Abonnement gevonden.'); } };
+    window.simulateLoad = function() { document.getElementById('chipkaartText').innerHTML = 'Saldo: €34,50<br><strong>€10,00 opgeladen!</strong>'; speak('Kaart opgeladen.'); };
+    window.updatePassengers = function() { const count = Math.floor(Math.random()*40)+10; document.getElementById('passengerCount').textContent = count; speak('Reizigers bijgewerkt naar '+count+'.'); };
+
+    function init() {
+        manualOffset = 0; currentDelayMinutes = 0;
+        renderRoute(currentLine, -1); updateButtons(); updateClock(); setInterval(updateClock,1000);
+        updateDelayDisplay(); updateStatusSquare();
+    }
+
+    document.querySelectorAll('.tile').forEach(t => t.addEventListener('click', function() { this.style.transform='scale(0.92)'; setTimeout(()=>this.style.transform='',120); }));
+    init();
+})();
+</script>
 </body>
 </html>
