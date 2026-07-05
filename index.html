@@ -16,6 +16,35 @@
     overflow:hidden;
     font-family:'Segoe UI','Source Sans Pro',sans-serif;
   }
+  /* --- LOGIN --- */
+  .login-overlay {
+    position:fixed; top:0; left:0; width:100vw; height:100vh;
+    background:#0a1628; z-index:9999;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .login-box {
+    background:#123247; border:3px solid #3FA7E0; border-radius:12px;
+    padding:40px 60px; text-align:center;
+  }
+  .login-title { color:#fff; font-size:32px; font-weight:900; margin-bottom:30px; }
+  .login-code {
+    background:#0a1628; border:2px solid #3B5565; border-radius:8px;
+    color:#fff; font-size:48px; font-weight:900; letter-spacing:12px;
+    padding:15px 30px; width:220px; text-align:center; margin-bottom:25px;
+  }
+  .login-dial {
+    display:grid; grid-template-columns:repeat(3,80px); gap:12px; justify-content:center;
+  }
+  .dial-btn {
+    width:80px; height:80px; border-radius:50%; border:none;
+    background:#3FA7E0; color:#fff; font-size:28px; font-weight:900;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .dial-btn:hover { background:#2E95D0; }
+  .dial-btn.del { background:#f44336; font-size:20px; }
+  .dial-btn.ok { background:#4caf50; font-size:18px; }
+  .login-error { color:#f44336; font-size:16px; font-weight:bold; margin-top:15px; height:22px; }
+
   .tablet {
     width:1280px;
     height:720px;
@@ -24,81 +53,82 @@
     background:#123247;
     border:solid 24px #151515;
     border-radius:6px;
-    display:flex;
+    display:none;
     flex-direction:column;
     overflow:hidden;
   }
   /* --- Header --- */
   .header {
-    height:40px;
+    height:64px;
     background:#243847;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 14px;
+    padding:0 20px;
     color:#fff;
     position:relative;
-    border-bottom:1px solid #3B5565;
+    border-bottom:2px solid #3B5565;
   }
-  .header-left { display:flex; align-items:center; gap:10px; z-index:2; }
+  .header-left { display:flex; align-items:center; gap:16px; z-index:2; }
   .home-icon { 
-    width:16px; height:16px; 
+    width:26px; height:26px; 
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
   }
-  .home-icon svg { width:14px; height:14px; fill:#fff; }
-  .status-icons { display:flex; gap:6px; align-items:center; }
-  .status-icon { width:14px; height:14px; display:flex; align-items:center; justify-content:center; }
-  .status-icon svg { width:12px; height:12px; fill:#fff; }
-  .h-line-num { font-weight:bold; font-size:18px; }
-  .h-status { font-size:18px; }
-  .header-center { position:absolute; left:50%; transform:translateX(-50%); font-size:13px; color:#C8D0D5; z-index:1; }
-  .header-right { display:flex; align-items:center; gap:10px; z-index:2; }
+  .home-icon svg { width:20px; height:20px; fill:#fff; }
+  .status-icons { display:flex; gap:10px; align-items:center; }
+  .status-icon { width:20px; height:20px; display:flex; align-items:center; justify-content:center; }
+  .status-icon svg { width:16px; height:16px; fill:#fff; }
+  .h-line-num { font-weight:900; font-size:26px; }
+  .h-status { font-size:24px; font-weight:700; }
+  .header-center { position:absolute; left:50%; transform:translateX(-50%); font-size:16px; color:#C8D0D5; font-weight:700; z-index:1; }
+  .header-right { display:flex; align-items:center; gap:16px; z-index:2; }
   .delay-pill {
     background:#fff;
     color:#000;
-    padding:2px 7px;
+    padding:6px 12px;
     border-radius:2px;
-    font-weight:bold;
-    font-size:13px;
-    min-width:46px;
+    font-weight:900;
+    font-size:18px;
+    min-width:64px;
     text-align:center;
   }
-  .h-timebox { text-align:right; line-height:1.2; }
-  .h-time { color:#000; font-weight:bold; font-size:16px; }
-  .h-date { color:#555; font-size:11px; }
+  .h-timebox { text-align:right; line-height:1.3; }
+  .h-time { color:#fff; font-weight:900; font-size:26px; }
+  .h-date { color:#aaa; font-size:14px; font-weight:700; }
 
   /* --- Main layout --- */
   .main { display:flex; flex:1; overflow:hidden; }
   .sidebar {
-    width:85px;
+    width:110px;
     background:#3FA7E0;
     display:flex;
     flex-direction:column;
     flex-shrink:0;
   }
   .side-btn {
-    height:45px;
+    height:68px;
     background:#3FA7E0;
     border:none;
     border-bottom:1px solid rgba(255,255,255,0.15);
     color:#fff;
-    font-size:10px;
+    font-size:13px;
+    font-weight:800;
     cursor:pointer;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:2px;
+    gap:4px;
     font-family:inherit;
   }
   .side-btn:hover { background:#2E95D0; }
   .side-btn.active { background:#1E7AAF; }
   .side-btn .ic { 
-    width:18px; height:18px; 
+    width:24px; height:24px; 
     display:flex; align-items:center; justify-content:center;
   }
-  .side-btn .ic svg { width:14px; height:14px; fill:#fff; }
+  .side-btn .ic svg { width:20px; height:20px; fill:#fff; }
 
   /* --- Content --- */
   .content {
@@ -109,100 +139,112 @@
     background:#123247;
   }
   .time-bar {
-    height:36px;
+    height:52px;
     background:#1a3a52;
-    border-bottom:1px solid #3B5565;
+    border-bottom:2px solid #3B5565;
     display:flex;
     align-items:center;
-    gap:10px;
-    padding:0 14px;
+    gap:16px;
+    padding:0 20px;
     color:#C8D0D5;
-    font-size:13px;
+    font-size:16px;
     flex-shrink:0;
   }
-  .time-bar label { font-weight:600; }
+  .time-bar label { font-weight:800; font-size:16px; }
   .time-bar input[type="time"] {
     background:#123247;
-    border:1px solid #3B5565;
+    border:2px solid #3B5565;
     color:#fff;
-    padding:3px 8px;
-    font-size:13px;
+    padding:8px 14px;
+    font-size:16px;
+    font-weight:800;
     font-family:inherit;
+    border-radius:4px;
   }
   .time-bar button {
     background:#3E8CC8;
     border:none;
     color:#fff;
-    padding:4px 12px;
+    padding:9px 18px;
     cursor:pointer;
-    font-size:12px;
+    font-size:15px;
+    font-weight:800;
     font-family:inherit;
+    border-radius:4px;
   }
   .stop-list { flex:1; overflow-y:auto; }
   .stop-row {
     display:flex;
     align-items:center;
-    height:40px;
-    padding:0 14px;
-    border-bottom:1px solid #3B5565;
+    min-height:58px;
+    padding:6px 20px;
+    border-bottom:2px solid #3B5565;
     color:#fff;
-    font-size:17px;
+    font-size:20px;
     position:relative;
   }
   .stop-row.past { opacity:0.35; }
   .stop-row.active { background:#667B2D; }
-  .stop-row.active .stop-name { font-weight:bold; font-size:18px; }
-  .stop-row.active .stop-time { font-weight:bold; font-size:16px; }
+  .stop-row.active .stop-name { font-weight:900; font-size:22px; }
+  .stop-row.active .stop-time { font-weight:900; font-size:19px; }
   .stop-dot {
-    width:10px; height:10px;
+    width:16px; height:16px;
     background:#fff;
     border-radius:50%;
-    margin-right:12px;
+    margin-right:18px;
     flex-shrink:0;
   }
   .stop-h {
-    width:26px; height:26px;
-    background:#667B2D;
+    width:44px; height:44px;
+    background:#E0D040;
     border-radius:50%;
-    color:#fff;
+    color:#000;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-weight:bold;
-    font-size:14px;
-    margin-right:12px;
+    font-weight:900;
+    font-size:20px;
+    margin-right:18px;
     flex-shrink:0;
   }
   .stop-start-icon {
-    width:26px; height:26px;
+    width:44px; height:44px;
     display:flex; align-items:center; justify-content:center;
-    margin-right:12px;
+    margin-right:18px;
     flex-shrink:0;
   }
-  .stop-start-icon svg { width:16px; height:16px; fill:#fff; }
+  .stop-start-icon svg { width:24px; height:24px; fill:#fff; }
+  .stop-info { flex:1; display:flex; flex-direction:column; gap:2px; }
   .stop-name {
-    flex:1;
+    font-weight:700;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
   }
+  .stop-delay {
+    font-size:14px;
+    font-weight:800;
+    color:#ffc107;
+  }
   .stop-rit {
-    font-size:12px;
+    font-size:14px;
     color:#C8D0D5;
-    margin-right:14px;
+    margin-right:18px;
     white-space:nowrap;
+    font-weight:700;
   }
   .stop-time {
-    font-size:15px;
-    margin-right:10px;
+    font-size:18px;
+    margin-right:12px;
     font-family:'Segoe UI',monospace;
     white-space:nowrap;
-    min-width:44px;
+    min-width:56px;
     text-align:right;
+    font-weight:800;
   }
-  .stop-actions { display:flex; gap:4px; flex-shrink:0; }
+  .stop-actions { display:flex; gap:6px; flex-shrink:0; }
   .act-btn {
-    width:24px; height:24px;
+    width:36px; height:36px;
     background:#3E8CC8;
     border:none;
     color:#fff;
@@ -210,79 +252,113 @@
     align-items:center;
     justify-content:center;
     cursor:pointer;
-    font-size:11px;
     padding:0;
+    border-radius:3px;
   }
-  .act-btn svg { width:12px; height:12px; fill:#fff; }
+  .act-btn svg { width:18px; height:18px; fill:#fff; }
 
-  /* --- Right panel (line switch) --- */
+  /* --- Right panel --- */
   .right-panel {
-    width:110px;
+    width:150px;
     background:#1a3a52;
-    border-left:1px solid #3B5565;
+    border-left:2px solid #3B5565;
     display:flex;
     flex-direction:column;
-    padding:6px;
-    gap:6px;
+    padding:12px;
+    gap:10px;
     flex-shrink:0;
   }
   .line-btn {
-    padding:8px;
+    padding:14px;
     background:#2a5a82;
-    border:1px solid #3B5565;
+    border:2px solid #3B5565;
     color:#fff;
-    font-size:12px;
+    font-size:16px;
+    font-weight:800;
     cursor:pointer;
     text-align:center;
     font-family:inherit;
+    border-radius:4px;
   }
   .line-btn:hover { background:#3E8CC8; }
   .line-btn.active { background:#3FA7E0; border-color:#3FA7E0; }
 
   /* --- Bottom bar --- */
   .bottom {
-    height:48px;
+    height:72px;
     background:#243847;
-    border-top:1px solid #3B5565;
+    border-top:2px solid #3B5565;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:0 14px;
+    padding:0 20px;
     flex-shrink:0;
   }
-  .bottom-left { display:flex; gap:8px; }
+  .bottom-left { display:flex; gap:12px; }
   .btn {
-    padding:8px 18px;
+    padding:14px 28px;
     border:none;
-    border-radius:3px;
-    font-size:13px;
-    font-weight:bold;
+    border-radius:4px;
+    font-size:16px;
+    font-weight:900;
     cursor:pointer;
     color:#fff;
     font-family:inherit;
-    display:flex; align-items:center; gap:6px;
+    display:flex; align-items:center; gap:10px;
   }
   .btn-green { background:#4a7c3a; }
   .btn-blue { background:#1976d2; }
   .btn:disabled { opacity:0.3; cursor:not-allowed; }
-  .btn svg { width:14px; height:14px; fill:#fff; }
-  .bottom-right { display:flex; align-items:center; gap:14px; color:#fff; }
+  .btn svg { width:20px; height:20px; fill:#fff; }
+  .bottom-right { display:flex; align-items:center; gap:18px; color:#fff; }
   .badge {
     background:#667B2D;
-    padding:5px 12px;
-    border-radius:12px;
-    font-size:12px;
-    font-weight:bold;
+    padding:10px 20px;
+    border-radius:14px;
+    font-size:16px;
+    font-weight:900;
   }
-  .clock-box { text-align:right; line-height:1.2; }
-  .clock-big { font-size:18px; font-weight:bold; }
-  .clock-small { font-size:11px; color:#C8D0D5; }
+  .countdown-box {
+    background:#fff;
+    padding:10px 20px;
+    border-radius:2px;
+    font-size:22px;
+    font-weight:900;
+    color:#000;
+    min-width:100px;
+    text-align:center;
+  }
+  .clock-box { text-align:right; line-height:1.3; }
+  .clock-big { font-size:26px; font-weight:900; color:#fff; }
+  .clock-small { font-size:14px; color:#C8D0D5; font-weight:700; }
 </style>
-<base target="_blank">
 </head>
 <body>
 
-<div class="tablet">
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-title">VOER CODE IN</div>
+    <div class="login-code" id="loginCode">____</div>
+    <div class="login-dial">
+      <button class="dial-btn" onclick="dial(1)">1</button>
+      <button class="dial-btn" onclick="dial(2)">2</button>
+      <button class="dial-btn" onclick="dial(3)">3</button>
+      <button class="dial-btn" onclick="dial(4)">4</button>
+      <button class="dial-btn" onclick="dial(5)">5</button>
+      <button class="dial-btn" onclick="dial(6)">6</button>
+      <button class="dial-btn" onclick="dial(7)">7</button>
+      <button class="dial-btn" onclick="dial(8)">8</button>
+      <button class="dial-btn" onclick="dial(9)">9</button>
+      <button class="dial-btn del" onclick="dialDel()">&#x232B;</button>
+      <button class="dial-btn" onclick="dial(0)">0</button>
+      <button class="dial-btn ok" onclick="dialOk()">OK</button>
+    </div>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div class="tablet" id="tablet">
   <div class="header">
     <div class="header-left">
       <div class="home-icon" onclick="goHome()">
@@ -295,11 +371,11 @@
         <div class="status-icon" title="Berichten"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div>
       </div>
       <span class="h-line-num" id="hLineNum">54</span>
-      <span class="h-status" id="hStatus">Sorry, geen dienst</span>
+      <span class="h-status" id="hStatus">Garage Busdepot</span>
     </div>
     <div class="header-center" id="hRit">Rit 805519</div>
     <div class="header-right">
-      <div class="delay-pill" id="hDelay">+0,00</div>
+      <div class="delay-pill" id="hDelay">+0,0</div>
       <div class="h-timebox">
         <div class="h-time" id="clockTime">07:53:00</div>
         <div class="h-date" id="clockDate">05-07-2026</div>
@@ -355,7 +431,7 @@
       <button class="line-btn active" onclick="switchLine('54')">Lijn 54</button>
       <button class="line-btn" onclick="switchLine('18')">Lijn 18</button>
       <button class="line-btn" onclick="switchLine('27')">Lijn 27</button>
-      <button class="line-btn" onclick="switchLine('42')">Lijn 42</button>
+      <button class="line-btn" onclick="switchLine('5')">Lijn 5</button>
     </div>
   </div>
 
@@ -375,6 +451,7 @@
       </button>
     </div>
     <div class="bottom-right">
+      <div class="countdown-box" id="countdownBox">0,0</div>
       <div class="badge" id="badge">Aankomst: --:--</div>
       <div class="clock-box">
         <div class="clock-big" id="clockTime2">07:53:00</div>
@@ -388,54 +465,55 @@
 const busLines = {
   '54': { number:'54', destination:'Halte Busdepot',
     stops: [
-      {name:'Medisch Centrum', offset:0, type:'start'},
+      {name:'Garage Busdepot', offset:0, type:'start'},
       {name:'Tijdelijke Halte Rotonde BD', offset:2},
       {name:'Halte Museumplein', offset:4},
       {name:'Halte Malherplein', offset:6},
-      {name:'Bus Station', offset:8},
-      {name:'Halte Europaweg', offset:10},
-      {name:'Halte Busdepot (eindpunt)', offset:12, type:'end'}
+      {name:'Bus Station', offset:8, pause:2},
+      {name:'Halte Europaweg', offset:12},
+      {name:'Halte Busdepot (eindpunt)', offset:14, type:'end'}
     ]},
   '18': { number:'18', destination:'Leeuwarden Airport',
     stops: [
-      {name:'Centraal Station', offset:0, type:'start'},
+      {name:'Garage Busdepot', offset:0, type:'start'},
       {name:'Halte Busdepot', offset:2},
       {name:'Leeuwarden Airport', offset:4},
-      {name:'Bus Station', offset:6},
-      {name:'Halte Museumplein', offset:8},
-      {name:'Halte Malherplein', offset:10},
-      {name:'Halte Van Houtenlaan', offset:12},
-      {name:'Halte School', offset:14},
-      {name:'Halte Busdepot', offset:16},
-      {name:'Leeuwarden Airport (eindpunt)', offset:18, type:'end'}
+      {name:'Bus Station', offset:6, pause:2},
+      {name:'Halte Museumplein', offset:10},
+      {name:'Halte Malherplein', offset:12},
+      {name:'Halte Van Houtenlaan', offset:14},
+      {name:'Halte School', offset:16},
+      {name:'Halte Busdepot', offset:18},
+      {name:'Leeuwarden Airport (eindpunt)', offset:20, type:'end'}
     ]},
   '27': { number:'27', destination:'Halte Busdepot',
     stops: [
-      {name:'Halte Wijk Station', offset:0, type:'start'},
+      {name:'Garage Busdepot', offset:0, type:'start'},
       {name:'Halte Europaweg', offset:2},
-      {name:'Bus Station', offset:7},
-      {name:'Medisch Centrum', offset:9},
-      {name:'Halte Malherplein', offset:11},
-      {name:'Halte Museumplein', offset:13},
-      {name:'Halte Veldstraat', offset:15},
-      {name:'Halte School', offset:17},
-      {name:'Halte Busdepot (eindpunt)', offset:19, type:'end'}
+      {name:'Bus Station', offset:7, pause:2},
+      {name:'Medisch Centrum', offset:11},
+      {name:'Halte Malherplein', offset:13},
+      {name:'Halte Museumplein', offset:15},
+      {name:'Halte Veldstraat', offset:17},
+      {name:'Halte School', offset:19},
+      {name:'Halte Busdepot (eindpunt)', offset:21, type:'end'}
     ]},
-  '42': { number:'42', destination:'Halte Busdepot',
+  '5': { number:'5', destination:'Halte Busdepot',
     stops: [
-      {name:'Halte Veldstraat', offset:0, type:'start'},
-      {name:'Halte Van Houtenlaan', offset:2},
-      {name:'Medisch Centrum', offset:4},
-      {name:'Tijdelijke Halte Rotonde BD', offset:6},
-      {name:'Bus Station', offset:8},
-      {name:'Centraal Station', offset:10},
-      {name:'Halte Europaweg', offset:12},
-      {name:'Tijdelijke Halte Rotonde BD', offset:14},
-      {name:'Medisch Centrum', offset:16},
-      {name:'Halte Van Houtenlaan', offset:18},
-      {name:'Halte School', offset:20},
-      {name:'Halte Busdepot', offset:22},
-      {name:'Halte Busdepot (eindpunt)', offset:24, type:'end'}
+      {name:'Garage Busdepot', offset:0, type:'start'},
+      {name:'Halte Veldstraat', offset:2},
+      {name:'Halte Van Houtenlaan', offset:4},
+      {name:'Medisch Centrum', offset:6},
+      {name:'Tijdelijke Halte Rotonde BD', offset:8},
+      {name:'Bus Station', offset:10, pause:2},
+      {name:'Centraal Station', offset:14},
+      {name:'Halte Europaweg', offset:16},
+      {name:'Tijdelijke Halte Rotonde BD', offset:18},
+      {name:'Medisch Centrum', offset:20},
+      {name:'Halte Van Houtenlaan', offset:22},
+      {name:'Halte School', offset:24},
+      {name:'Halte Busdepot', offset:26},
+      {name:'Halte Busdepot (eindpunt)', offset:28, type:'end'}
     ]}
 };
 
@@ -445,6 +523,10 @@ let plannedArrival = null;
 let actualStart = null;
 let currentStopIndex = -1;
 let isPlaying = false;
+let totalDelayMin = 0;
+
+const LOGIN_CODE = '2310';
+let enteredCode = '';
 
 function fmtTime(d) {
   if (!d) return '--:--';
@@ -454,21 +536,98 @@ function fmtDate(d) {
   return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
 }
 
+/* --- LOGIN --- */
+window.dial = function(n) {
+  if (enteredCode.length < 4) {
+    enteredCode += n;
+    updateLoginDisplay();
+  }
+};
+window.dialDel = function() {
+  enteredCode = enteredCode.slice(0,-1);
+  updateLoginDisplay();
+};
+window.dialOk = function() {
+  if (enteredCode === LOGIN_CODE) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('tablet').style.display = 'flex';
+    if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    else if (document.documentElement.webkitRequestFullscreen) document.documentElement.webkitRequestFullscreen();
+    initApp();
+  } else {
+    document.getElementById('loginError').textContent = 'FOUTE CODE!';
+    enteredCode = '';
+    setTimeout(updateLoginDisplay, 800);
+  }
+};
+function updateLoginDisplay() {
+  let disp = enteredCode;
+  while (disp.length < 4) disp += '_';
+  document.getElementById('loginCode').textContent = disp;
+  document.getElementById('loginError').textContent = '';
+}
+
+function initApp() {
+  updateClock();
+  setNow();
+  render();
+  setInterval(() => { updateClock(); updateCountdown(); render(); }, 1000);
+}
+
 function updateClock() {
   const n = new Date();
   const t = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
-  document.getElementById('clockTime').textContent = t;
-  document.getElementById('clockTime2').textContent = t;
-  document.getElementById('clockDate').textContent = fmtDate(n);
-  document.getElementById('clockDate2').textContent = n.getDate()+' '+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][n.getMonth()]+' '+n.getFullYear();
+  const el1 = document.getElementById('clockTime');
+  const el2 = document.getElementById('clockTime2');
+  if (el1) el1.textContent = t;
+  if (el2) el2.textContent = t;
+  const elD1 = document.getElementById('clockDate');
+  const elD2 = document.getElementById('clockDate2');
+  if (elD1) elD1.textContent = fmtDate(n);
+  if (elD2) elD2.textContent = n.getDate()+' '+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][n.getMonth()]+' '+n.getFullYear();
 }
 
-/* --- Sidebar functionaliteit --- */
+function updateCountdown() {
+  const box = document.getElementById('countdownBox');
+  if (!box) return;
+  if (currentStopIndex < 0 || !actualStart) {
+    box.textContent = '0,0';
+    return;
+  }
+  const now = new Date();
+  const ref = getRef();
+  if (!ref || currentStopIndex >= currentStops.length - 1) {
+    box.textContent = '0,0';
+    return;
+  }
+  const nextTime = new Date(ref.getTime() + currentStops[currentStopIndex + 1].offset * 60000);
+  const diffMin = (nextTime - now) / 60000;
+  if (diffMin <= 0) {
+    box.textContent = '0,0';
+  } else {
+    // Format: 2,5 - 2,0 - 1,5 - 1,0 - 0,5
+    const rounded = Math.floor(diffMin * 2) / 2;
+    box.textContent = String(rounded).replace('.',',');
+  }
+}
+
+/* --- Bereken offsets met pauzes --- */
+function calcOffsets(stops) {
+  let acc = 0;
+  return stops.map(s => {
+    const o = { ...s, calcOffset: acc };
+    acc += (s.pause || 0) * 60; // pauze in seconden voor interne calc
+    return o;
+  });
+}
+
+/* --- Sidebar --- */
 window.goHome = function() {
   currentStopIndex = -1;
   actualStart = null;
   plannedArrival = null;
-  document.getElementById('hStatus').textContent = 'Sorry, geen dienst';
+  totalDelayMin = 0;
+  document.getElementById('hStatus').textContent = 'Garage Busdepot';
   document.getElementById('btnVertrek').disabled = false;
   document.getElementById('btnVolgende').disabled = true;
   document.getElementById('btnTerug').disabled = true;
@@ -484,22 +643,13 @@ window.togglePlay = function() {
     : '<div class="ic"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
 };
 
-window.showMeldingen = function() {
-  alert('Meldingen: Geen nieuwe meldingen.');
-};
-
-window.showMededelingen = function() {
-  alert('Mededelingen: Geen mededelingen.');
-};
-
-window.showKaart = function() {
-  alert('Kaart: GPS-navigatie wordt geladen...');
-};
+window.showMeldingen = function() { alert('Meldingen: Geen nieuwe meldingen.'); };
+window.showMededelingen = function() { alert('Mededelingen: Geen mededelingen.'); };
+window.showKaart = function() { alert('Kaart: GPS-navigatie wordt geladen...'); };
 
 window.showRit = function() {
   document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.side-btn')[4].classList.add('active');
-  // Herstel rit weergave
   const content = document.querySelector('.content');
   content.innerHTML = '<div class="time-bar"><label>Geplande aankomst eindpunt:</label><input type="time" id="arrivalInput" onchange="setArrival()"><button onclick="setNow()">Nu</button></div><div class="stop-list" id="stopList"></div>';
   render();
@@ -507,20 +657,18 @@ window.showRit = function() {
 
 window.showRitten = function() {
   const content = document.querySelector('.content');
-  content.innerHTML = '<div style="padding:20px; color:#fff;"><h2 style="margin-bottom:20px;">Ritinstelling</h2><p style="color:#C8D0D5;">Kies rit o.a.</p><div style="margin-top:20px; color:#C8D0D5; line-height:2;">10:11&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;ESA/ESTEC (Katwijk)&nbsp;&nbsp;&nbsp;Route 10<br>12:28&nbsp;&nbsp;&nbsp;Lijn 400&nbsp;&nbsp;&nbsp;Ingang Lagerweg Stalling&nbsp;&nbsp;&nbsp;Route 15<br>12:36&nbsp;&nbsp;&nbsp;Lijn 400&nbsp;&nbsp;&nbsp;Centrum-West&nbsp;&nbsp;&nbsp;Route 12<br>13:31&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;Centrum-West&nbsp;&nbsp;&nbsp;Route 10<br>14:26&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;Boulevard-Zuid&nbsp;&nbsp;&nbsp;Route 19</div></div>';
+  content.innerHTML = '<div style="padding:24px; color:#fff;"><h2 style="margin-bottom:24px; font-size:24px;">Ritinstelling</h2><p style="color:#C8D0D5; font-size:16px;">Kies rit o.a.</p><div style="margin-top:24px; color:#C8D0D5; line-height:2.2; font-size:16px; font-weight:600;">10:11&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;ESA/ESTEC (Katwijk)&nbsp;&nbsp;&nbsp;Route 10<br>12:28&nbsp;&nbsp;&nbsp;Lijn 400&nbsp;&nbsp;&nbsp;Ingang Lagerweg Stalling&nbsp;&nbsp;&nbsp;Route 15<br>12:36&nbsp;&nbsp;&nbsp;Lijn 400&nbsp;&nbsp;&nbsp;Centrum-West&nbsp;&nbsp;&nbsp;Route 12<br>13:31&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;Centrum-West&nbsp;&nbsp;&nbsp;Route 10<br>14:26&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;Boulevard-Zuid&nbsp;&nbsp;&nbsp;Route 19</div></div>';
 };
 
-window.showLijnfilm = function() {
-  alert('Lijnfilm: Video wordt geladen...');
-};
+window.showLijnfilm = function() { alert('Lijnfilm: Video wordt geladen...'); };
 
 window.lockScreen = function() {
   if (confirm('Scherm vergrendelen?')) {
-    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-size:24px;"><div style="text-align:center;"><svg width="60" height="60" viewBox="0 0 24 24" fill="#fff"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg><br><br>Scherm vergrendeld<br><br><button onclick="location.reload()" style="padding:10px 20px;background:#3FA7E0;border:none;color:#fff;cursor:pointer;font-size:16px;">Ontgrendelen</button></div></div>';
+    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-size:28px;"><div style="text-align:center;"><svg width="80" height="80" viewBox="0 0 24 24" fill="#fff"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg><br><br>Scherm vergrendeld<br><br><button onclick="location.reload()" style="padding:14px 28px;background:#3FA7E0;border:none;color:#fff;cursor:pointer;font-size:18px;font-weight:900;">Ontgrendelen</button></div></div>';
   }
 };
 
-/* --- Aankomsttijd instellen (eindpunt) --- */
+/* --- Aankomsttijd --- */
 window.setArrival = function() {
   const v = document.getElementById('arrivalInput').value;
   if (!v) return;
@@ -531,11 +679,21 @@ window.setArrival = function() {
 };
 window.setNow = function() {
   const n = new Date();
-  const total = currentStops[currentStops.length-1].offset;
-  const arr = new Date(n.getTime() + total*60000);
-  document.getElementById('arrivalInput').value = String(arr.getHours()).padStart(2,'0')+':'+String(arr.getMinutes()).padStart(2,'0');
+  const totalOffset = getTotalOffset(currentStops);
+  const arr = new Date(n.getTime() + totalOffset * 60000);
+  const inp = document.getElementById('arrivalInput');
+  if (inp) inp.value = String(arr.getHours()).padStart(2,'0')+':'+String(arr.getMinutes()).padStart(2,'0');
   setArrival();
 };
+
+function getTotalOffset(stops) {
+  let total = 0;
+  for (let s of stops) {
+    total += s.offset;
+    if (s.pause) total += s.pause;
+  }
+  return total;
+}
 
 /* --- Lijn wisselen --- */
 window.switchLine = function(key) {
@@ -545,8 +703,9 @@ window.switchLine = function(key) {
   currentStopIndex = -1;
   actualStart = null;
   plannedArrival = null;
+  totalDelayMin = 0;
   document.getElementById('hLineNum').textContent = busLines[key].number;
-  document.getElementById('hStatus').textContent = 'Sorry, geen dienst';
+  document.getElementById('hStatus').textContent = 'Garage Busdepot';
   document.getElementById('btnVertrek').disabled = false;
   document.getElementById('btnVolgende').disabled = true;
   document.getElementById('btnTerug').disabled = true;
@@ -562,6 +721,7 @@ window.depart = function() {
   if (!plannedArrival) setNow();
   actualStart = new Date();
   currentStopIndex = 0;
+  totalDelayMin = 0;
   document.getElementById('hStatus').textContent = 'Actief';
   document.getElementById('btnVertrek').disabled = true;
   document.getElementById('btnVolgende').disabled = false;
@@ -570,6 +730,16 @@ window.depart = function() {
 };
 window.nextStop = function() {
   if (currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
+  
+  // Bereken vertraging bij aankomst huidige halte
+  const ref = getRef();
+  if (ref && currentStopIndex < currentStops.length - 1) {
+    const plannedTime = new Date(ref.getTime() + getCumulativeOffset(currentStopIndex) * 60000);
+    const now = new Date();
+    const diff = (now - plannedTime) / 60000;
+    if (diff > 0) totalDelayMin += diff;
+  }
+  
   currentStopIndex++;
   if (currentStopIndex === currentStops.length-1) {
     document.getElementById('btnVolgende').disabled = true;
@@ -586,13 +756,28 @@ window.prevStop = function() {
   render();
 };
 
+function getCumulativeOffset(stopIdx) {
+  let acc = 0;
+  for (let i = 0; i <= stopIdx; i++) {
+    acc += currentStops[i].offset;
+    if (currentStops[i].pause && i < stopIdx) acc += currentStops[i].pause;
+  }
+  return acc;
+}
+
 /* --- Helpers --- */
 function getStartTime() {
   if (!plannedArrival) return null;
-  const total = currentStops[currentStops.length-1].offset;
-  return new Date(plannedArrival.getTime() - total*60000);
+  const total = getTotalOffset(currentStops);
+  return new Date(plannedArrival.getTime() - total * 60000);
 }
 function getRef() { return actualStart || getStartTime(); }
+
+function getPlannedTime(stopIdx) {
+  const ref = getRef();
+  if (!ref) return null;
+  return new Date(ref.getTime() + getCumulativeOffset(stopIdx) * 60000);
+}
 
 /* --- Render --- */
 function render() {
@@ -616,16 +801,26 @@ function render() {
       left = '<div class="stop-dot"></div>';
     }
 
-    const t = ref ? new Date(ref.getTime() + s.offset*60000) : null;
-    const timeStr = fmtTime(t);
+    const planned = getPlannedTime(i);
+    const timeStr = planned ? fmtTime(planned) : '--:--';
     const ritText = (i === 0) ? 'Rit '+currentLine+'/1042' : '';
+    
+    // Delay berekenen voor deze halte
+    let delayHtml = '';
+    if (i > currentStopIndex && totalDelayMin > 0.05) {
+      const delayStr = '+' + totalDelayMin.toFixed(1).replace('.',',');
+      delayHtml = '<div class="stop-delay">' + delayStr + '</div>';
+    } else if (i > currentStopIndex && totalDelayMin <= -0.05) {
+      const delayStr = totalDelayMin.toFixed(1).replace('.',',');
+      delayHtml = '<div class="stop-delay">' + delayStr + '</div>';
+    }
 
     const actions = (i === currentStopIndex)
       ? '<div class="stop-actions"><button class="act-btn" onclick="showInfo(\''+s.name+'\')" title="Info"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button><button class="act-btn" onclick="showBlock(\''+s.name+'\')" title="Blokkeren"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg></button></div>'
       : '<div class="stop-actions" style="visibility:hidden;"><button class="act-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button><button class="act-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg></button></div>';
 
     row.innerHTML = left +
-      '<div class="stop-name">'+s.name+'</div>' +
+      '<div class="stop-info"><div class="stop-name">'+s.name+'</div>'+delayHtml+'</div>' +
       '<div class="stop-rit">'+ritText+'</div>' +
       '<div class="stop-time">'+timeStr+'</div>' +
       actions;
@@ -644,7 +839,7 @@ function render() {
   } else if (currentStopIndex === -1 && plannedArrival && !actualStart) {
     badge.textContent = 'Aankomst: '+fmtTime(plannedArrival);
   } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length-1) {
-    const next = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
+    const next = getPlannedTime(currentStopIndex + 1);
     badge.textContent = 'Aankomst: '+fmtTime(next);
   } else if (currentStopIndex >= currentStops.length-1) {
     badge.textContent = 'Eindbestemming';
@@ -654,18 +849,18 @@ function render() {
 
   /* Delay pill */
   const hDelay = document.getElementById('hDelay');
+  const now = new Date();
   if (!ref || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) {
-    hDelay.textContent = '+0,00';
+    hDelay.textContent = '+0,0';
   } else {
-    const now = new Date();
-    const nextTime = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
+    const nextTime = getPlannedTime(currentStopIndex + 1);
     const diffMin = (now - nextTime) / 60000;
     const sign = diffMin >= 0 ? '+' : '';
-    hDelay.textContent = sign + diffMin.toFixed(2).replace('.',',');
+    hDelay.textContent = sign + diffMin.toFixed(1).replace('.',',');
   }
 }
 
-/* --- Actieknoppen functionaliteit --- */
+/* --- Actieknoppen --- */
 window.showInfo = function(stopName) {
   alert('Info: '+stopName+'\n\nHalte-informatie wordt geladen...');
 };
@@ -673,11 +868,7 @@ window.showBlock = function(stopName) {
   alert('Blokkeren: '+stopName+'\n\nHalte is nu geblokkeerd.');
 };
 
-/* --- Start --- */
-setInterval(() => { updateClock(); render(); }, 1000);
-updateClock();
-setNow();
-render();
+updateLoginDisplay();
 </script>
 </body>
 </html>
