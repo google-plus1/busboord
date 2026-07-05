@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – Alle knoppen werken</title>
+    <title>Arriva Boordcomputer – Live status & volledig werkend</title>
     <style>
         :root {
             --bg-cream: #E8E8D8;
@@ -61,7 +61,7 @@
             width: 100%; padding: 10px 6px; border-radius: 6px;
             border: 1px solid var(--border-color);
             background: var(--sidebar-btn); color: var(--text-dark);
-            font-size: 12px; font-weight: 600; cursor: pointer;
+            font-size: 11px; font-weight: 600; cursor: pointer;
             transition: all 0.15s; text-align: center;
         }
         .sidebar-btn:hover { background: var(--sidebar-btn-hover); transform: translateY(-1px); }
@@ -148,17 +148,17 @@
             background: var(--sidebar-btn); font-weight: 600; cursor: pointer;
         }
 
-        .dial-overlay {
+        .dial-overlay, .alert-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(6px); z-index: 2000;
             display: none; align-items: center; justify-content: center;
         }
-        .dial-overlay.show { display: flex; }
-        .dial-panel {
+        .dial-overlay.show, .alert-overlay.show { display: flex; }
+        .dial-panel, .alert-panel {
             background: var(--bg-light); border-radius: 20px; padding: 24px;
             display: flex; flex-direction: column; align-items: center; gap: 16px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 2px solid var(--border-color);
-            min-width: 280px;
+            min-width: 280px; max-width: 90vw;
         }
         .dial-display {
             width: 100%; padding: 16px; background: var(--green-pale);
@@ -176,10 +176,18 @@
             display: flex; align-items: center; justify-content: center;
         }
         .dial-key:hover { background: var(--sidebar-btn-hover); transform: scale(0.94); }
-        .dial-key:active { background: var(--sidebar-btn-active); color: white; border-color: var(--green-dark); }
         .dial-key.clear { background: var(--red-alert); color: white; border-color: var(--red-dark); font-size: 18px; }
         .dial-key.ok { background: var(--green-dark); color: white; border-color: #2E5A1E; font-size: 20px; }
         .dial-key.zero { grid-column: 2; }
+
+        .alert-message {
+            font-size: 20px; font-weight: 700; text-align: center; color: var(--text-dark);
+        }
+        .alert-ok-btn {
+            padding: 12px 40px; border-radius: 10px; border: none;
+            background: var(--green-dark); color: white; font-weight: 700;
+            font-size: 18px; cursor: pointer; margin-top: 8px;
+        }
 
         .stop-list::-webkit-scrollbar { width: 6px; }
         .stop-list::-webkit-scrollbar-track { background: transparent; }
@@ -211,6 +219,7 @@
         .toggle-switch.active::after { transform: translateX(20px); }
         textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); font-family: inherit; resize: vertical; }
         .back-btn { width: 32px; height: 32px; border-radius: 6px; border: none; background: var(--sidebar-btn); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        input[type=range] { width: 100%; }
     </style>
 </head>
 <body>
@@ -253,12 +262,17 @@
 
             <div class="right-sidebar">
                 <button class="sidebar-btn active" id="btnLijn" onclick="openDial()">🔢 LIJN</button>
-                <button class="sidebar-btn" id="btnBestuurder" onclick="driverInfo()">Bestuurder</button>
-                <button class="sidebar-btn" id="btnOmloop" onclick="cycleOmloop()">Omloop</button>
-                <button class="sidebar-btn" id="btnHoofdscherm" onclick="goToPage('home')">Hoofdscherm</button>
-                <button class="sidebar-btn" id="btnKaart" onclick="goToPage('verkoop')">Kaartverkoop</button>
-                <button class="sidebar-btn" id="btnOproep" onclick="goToPage('omroep')">Oproepen</button>
-                <button class="sidebar-btn" id="btnMenu" onclick="goToPage('instellingen')">Menu</button>
+                <button class="sidebar-btn" onclick="driverInfo()">👤 Bestuurder</button>
+                <button class="sidebar-btn" onclick="cycleOmloop()">🔄 Omloop</button>
+                <button class="sidebar-btn" onclick="goToPage('home')">🏠 Hoofdscherm</button>
+                <button class="sidebar-btn" onclick="goToPage('verkoop')">🎫 Kaartverkoop</button>
+                <button class="sidebar-btn" onclick="goToPage('omroep')">📢 Oproepen</button>
+                <button class="sidebar-btn" onclick="goToPage('instellingen')">⚙️ Menu</button>
+                <button class="sidebar-btn" onclick="toggleDoor()">🚪 Deuren</button>
+                <button class="sidebar-btn" onclick="toggleLight()">💡 Verlichting</button>
+                <button class="sidebar-btn" onclick="scanChipkaart()">💳 Chipkaart</button>
+                <button class="sidebar-btn" onclick="abonnementInfo()">📋 Abonnement</button>
+                <button class="sidebar-btn" onclick="reizigersInfo()">👥 Reizigers</button>
             </div>
         </div>
 
@@ -316,8 +330,13 @@
         <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>⚙️ Instellingen</h2></div>
         <div class="subpage-content">
             <div class="card"><h3>🔊 Audio</h3>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><span>Spraakomroepen</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><span>Spraakomroepen</span><div class="toggle-switch active" id="speechToggle" onclick="this.classList.toggle('active')"></div></div>
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;"><span>Meldinggeluiden</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div>
+                <div style="margin-top:12px;"><span>Volume</span><input type="range" min="0" max="100" value="75" oninput="document.getElementById('volValue').textContent=this.value+'%'"><span id="volValue">75%</span></div>
+            </div>
+            <div class="card"><h3>🖥️ Weergave</h3>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><span>Donkere modus</span><div class="toggle-switch" onclick="this.classList.toggle('active')"></div></div>
+                <div style="margin-top:12px;"><span>Helderheid</span><input type="range" min="30" max="100" value="80" oninput="document.getElementById('brightValue').textContent=this.value+'%'"><span id="brightValue">80%</span></div>
             </div>
             <div class="card"><h3>⚡ Acties</h3>
                 <button class="action-btn blue" onclick="alert('Data gesynchroniseerd!')">🔄 Synchroniseren</button>
@@ -345,6 +364,14 @@
                 <button class="dial-key zero" onclick="dialDigit('0')">0</button>
                 <button class="dial-key ok" onclick="dialConfirm()">OK</button>
             </div>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN ALERT OVERLAY -->
+    <div class="alert-overlay" id="alertOverlay">
+        <div class="alert-panel">
+            <div class="alert-message" id="alertMessage"></div>
+            <button class="alert-ok-btn" onclick="dismissAlert()">OK</button>
         </div>
     </div>
 </div>
@@ -384,12 +411,14 @@
     };
 
     let currentLine = '54', currentStops = busLines['54'].stops;
-    let plannedStart = null, actualStart = null, currentStopIndex = -1, delayMinutes = 0, cart = [], dialValue = '';
-    let omloop = 'A'; // for cycling
+    let plannedStart = null, actualStart = null, currentStopIndex = -1, delaySeconds = 0;
+    let cart = [], dialValue = '', omloop = 'A', doorOpen = false, lightOn = false;
 
     const $ = id => document.getElementById(id);
+
     function getPlannedTime(idx) { return actualStart ? new Date(actualStart.getTime() + currentStops[idx].offset*60000) : (plannedStart ? new Date(plannedStart.getTime() + currentStops[idx].offset*60000) : null); }
     function formatTime(d) { return d ? `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '--:--'; }
+
     function updateClock() {
         const n = new Date();
         $('clockTime').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
@@ -397,6 +426,7 @@
         $('clockDate').textContent = `${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;
         $('topDate').textContent = `${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;
     }
+
     function updateArrivalBadge() {
         const b = $('arrivalBadge');
         if (currentStopIndex === -1 && plannedStart && !actualStart) b.textContent = `Vertrek: ${formatTime(plannedStart)}`;
@@ -404,35 +434,77 @@
         else if (currentStopIndex >= currentStops.length-1) b.textContent = 'Eindbestemming';
         else b.textContent = 'Vertrek: --:--';
     }
+
+    function formatLiveDelay(sec) {
+        // sec is the difference in seconds (now - planned)
+        // coloring and text as requested
+        if (sec <= -60) {
+            let abs = Math.abs(sec);
+            let mins = Math.floor(abs / 60);
+            let rem = abs % 60;
+            let val = mins + (rem >= 30 ? 0.5 : 0);
+            let text = '-' + (val % 1 === 0 ? val.toString() : Math.floor(val) + '½');
+            return { text, color: 'red' };
+        } else if (sec <= -30) {
+            return { text: '-½', color: 'yellow' };
+        } else if (sec < 30) {
+            return { text: '0', color: 'green' };
+        } else if (sec < 60) {
+            return { text: '0', color: 'green' };
+        } else {
+            let mins = Math.floor(sec / 60);
+            return { text: '+' + mins, color: 'red' };
+        }
+    }
+
     function updateDelayBox() {
         const box = $('delayBox');
-        if (actualStart && plannedStart) {
-            delayMinutes = Math.round((actualStart - plannedStart)/60000);
-            box.textContent = delayMinutes===0 ? '0' : (delayMinutes>0 ? `+${delayMinutes}` : `${delayMinutes}`);
-            box.className = `delay-box ${delayMinutes===0 ? 'green' : (delayMinutes>0 ? 'red' : 'early')}`;
-        } else { box.textContent='0'; box.className='delay-box green'; delayMinutes=0; }
+        if (!actualStart || currentStopIndex < 0) {
+            box.textContent = '0';
+            box.className = 'delay-box green';
+            delaySeconds = 0;
+            return;
+        }
+        // live delay: difference between now and planned time of current stop
+        const planned = getPlannedTime(currentStopIndex);
+        if (!planned) {
+            box.textContent = '0';
+            box.className = 'delay-box green';
+            return;
+        }
+        delaySeconds = Math.round((new Date() - planned) / 1000);
+        const { text, color } = formatLiveDelay(delaySeconds);
+        box.textContent = text;
+        box.className = `delay-box ${color === 'red' ? 'red' : color === 'yellow' ? 'yellow' : 'green'}`;
     }
+
     function renderStops() {
         const list = $('stopList'); list.innerHTML = '';
         const ref = actualStart || plannedStart || null;
         currentStops.forEach((s,i) => {
             const d = document.createElement('div'); d.className = 'stop-item';
-            if (i===currentStopIndex) d.classList.add('current');
-            if (i<currentStopIndex) d.classList.add('past');
-            if (s.type==='start') d.classList.add('start');
-            if (s.type==='end') d.classList.add('end');
+            if (i === currentStopIndex) d.classList.add('current');
+            if (i < currentStopIndex) d.classList.add('past');
+            if (s.type === 'start') d.classList.add('start');
+            if (s.type === 'end') d.classList.add('end');
             const t = ref ? new Date(ref.getTime() + s.offset*60000) : null;
             let dev = '';
-            if (i===currentStopIndex && delayMinutes!==0) {
-                dev = `<span class="stop-deviation ${delayMinutes>0?'late':'early'}">${delayMinutes>0?'+':''}${delayMinutes} min</span>`;
+            if (i === currentStopIndex && delaySeconds !== 0 && actualStart) {
+                const { text: devText, color } = formatLiveDelay(delaySeconds);
+                dev = `<span class="stop-deviation ${color==='red'?'late':(color==='yellow'?'early':'')}">${devText}</span>`;
             }
             d.innerHTML = `<span class="stop-name">${s.name}</span><span class="stop-time">${formatTime(t)}</span>${dev}`;
             list.appendChild(d);
         });
-        if (currentStopIndex>=0) { const items = list.querySelectorAll('.stop-item'); if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({behavior:'smooth',block:'center'}); }
+        if (currentStopIndex >= 0) {
+            const items = list.querySelectorAll('.stop-item');
+            if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
+
     window.setPlannedTime = function() { const v=$('startTimeInput').value; if(!v) return; const [h,m]=v.split(':'); plannedStart=new Date(); plannedStart.setHours(h,m,0,0); renderStops(); updateArrivalBadge(); };
     window.setNow = function() { const n=new Date(); $('startTimeInput').value=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; setPlannedTime(); };
+
     window.switchLine = function(lk) {
         if (!busLines[lk]) return;
         currentLine=lk; currentStops=busLines[lk].stops; currentStopIndex=-1; actualStart=null; plannedStart=null;
@@ -441,12 +513,17 @@
         $('btnVertrek').disabled=false; $('btnVolgende').disabled=true; $('btnTerug').disabled=true;
         setNow(); updateDelayBox(); renderStops(); updateArrivalBadge();
     };
+
     window.depart = function() {
         if(!plannedStart) setPlannedTime();
         actualStart = new Date(); currentStopIndex = 1;
-        updateDelayBox(); $('btnVertrek').disabled=true; $('btnVolgende').disabled=false; $('btnTerug').disabled=false;
-        $('lineStatus').textContent='In dienst - Actief'; renderStops(); updateArrivalBadge();
+        $('btnVertrek').disabled=true; $('btnVolgende').disabled=false; $('btnTerug').disabled=false;
+        $('lineStatus').textContent='In dienst - Actief';
+        renderStops(); updateArrivalBadge(); updateDelayBox();
+        const msg = `Vertrokken om ${formatTime(actualStart)}\nVolgende halte: ${currentStops[1].name} om ${formatTime(getPlannedTime(1))}`;
+        showAlert(msg);
     };
+
     window.nextStop = function() {
         if(currentStopIndex<0||currentStopIndex>=currentStops.length-1) return;
         currentStopIndex++; if(currentStopIndex===currentStops.length-1) $('btnVolgende').disabled=true;
@@ -455,23 +532,27 @@
     window.prevStop = function() {
         if(currentStopIndex<=1) { currentStopIndex=0; $('btnTerug').disabled=true; $('btnVolgende').disabled=false; }
         else { currentStopIndex--; $('btnVolgende').disabled=false; }
-        renderStops(); updateArrivalBadge();
+        renderStops(); updateArrivalBadge(); updateDelayBox();
     };
 
-    // Sidebar button functions
-    window.driverInfo = function() {
-        alert('Bestuurder: J. de Vries\nDienstnummer: 4821\nSinds: 08:00');
-    };
+    function showAlert(msg) {
+        $('alertMessage').innerText = msg;
+        $('alertOverlay').classList.add('show');
+    }
+    window.dismissAlert = function() { $('alertOverlay').classList.remove('show'); };
+
+    window.driverInfo = function() { speak('Bestuurder J. de Vries'); alert('Bestuurder: J. de Vries\nDienstnummer: 4821'); };
     window.cycleOmloop = function() {
         const omloops = ['A','B','C'];
-        let idx = omloops.indexOf(omloop);
-        idx = (idx + 1) % omloops.length;
-        omloop = omloops[idx];
-        $('topOmloop').textContent = omloop;
-        alert(`Omloop gewijzigd naar ${omloop}`);
+        let idx = omloops.indexOf(omloop); idx = (idx+1)%omloops.length; omloop=omloops[idx];
+        $('topOmloop').textContent = omloop; speak(`Omloop gewijzigd naar ${omloop}`);
     };
+    window.toggleDoor = function() { doorOpen=!doorOpen; speak(`Deuren ${doorOpen?'geopend':'gesloten'}`); alert(`Deuren ${doorOpen?'geopend':'gesloten'}`); };
+    window.toggleLight = function() { lightOn=!lightOn; speak(`Verlichting ${lightOn?'aan':'uit'}`); alert(`Verlichting ${lightOn?'aan':'uit'}`); };
+    window.scanChipkaart = function() { speak('Chipkaart gescand'); alert('OV-chipkaart gescand\nSaldo: €24,50'); };
+    window.abonnementInfo = function() { speak('Abonnement actief'); alert('Abonnement: Maandbus\nGeldig tot 31 juli 2026'); };
+    window.reizigersInfo = function() { speak('24 reizigers aan boord'); alert('Reizigers: 24\nZitplaatsen: 12\nStaanplaatsen: 8'); };
 
-    // Dial pad
     window.openDial = function() { dialValue=''; $('dialDisplay').textContent=''; $('dialOverlay').classList.add('show'); };
     window.dialDigit = function(d) { if(dialValue.length<2) dialValue+=d; $('dialDisplay').textContent=dialValue; };
     window.dialClear = function() { dialValue=''; $('dialDisplay').textContent=''; };
@@ -482,20 +563,19 @@
         $('dialOverlay').classList.remove('show');
     };
 
-    // Cart and speech
     window.addToCart=function(n,p){cart.push({name:n,price:p});renderCart();};
     window.clearCart=function(){cart=[];renderCart();};
-    window.payCart=function(){if(!cart.length)return;alert('Betaling geslaagd!');cart=[];renderCart();};
+    window.payCart=function(){if(!cart.length)return;speak('Betaling geslaagd');alert('Betaling geslaagd!');cart=[];renderCart();};
     function renderCart(){
         const ci=$('cartItems'),ct=$('cartTotal'),tp=$('totalPrice'),pb=$('payBtn'),cb=$('clearBtn');
         if(!cart.length){ci.innerHTML='<div style="text-align:center;color:#888;padding:16px;">Nog geen kaartjes geselecteerd</div>';ct.style.display='none';pb.style.display='none';cb.style.display='none';return;}
         let h='',t=0;cart.forEach(i=>{t+=i.price;h+=`<div class="cart-item"><span>${i.name}</span><span>€${i.price.toFixed(2).replace('.',',')}</span></div>`;});
         ci.innerHTML=h;tp.textContent='€'+t.toFixed(2).replace('.',',');ct.style.display='flex';pb.style.display='block';cb.style.display='block';
     }
-    window.speak=function(t){if(window.speechSynthesis){window.speechSynthesis.cancel();window.speechSynthesis.speak(new SpeechSynthesisUtterance(t));}};
-    window.playCustom=function(){const t=$('customAnnouncement').value;if(t.trim())speak(t);};
 
-    // Page navigation
+    window.speak = function(t) { if(window.speechSynthesis){ window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='nl-NL'; u.rate=1.0; window.speechSynthesis.speak(u); } };
+    window.playCustom = function() { const t=$('customAnnouncement').value; if(t.trim()) speak(t); };
+
     window.goToPage = function(p) {
         document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
         $('pageHome').classList.toggle('active', p==='home');
@@ -506,7 +586,8 @@
 
     function init(){
         updateClock(); setInterval(updateClock,1000);
-        setNow(); renderStops(); updateDelayBox(); updateArrivalBadge(); setInterval(updateArrivalBadge,1000);
+        setNow(); renderStops(); updateDelayBox(); updateArrivalBadge();
+        setInterval(() => { updateDelayBox(); updateArrivalBadge(); }, 1000);
         switchLine('54');
     }
     init();
