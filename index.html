@@ -452,9 +452,9 @@ const busLines = {
       {name:'Tijdelijke Halte Rotonde BD', offset:4},
       {name:'Halte Museumplein', offset:6},
       {name:'Halte Malherplein', offset:8},
-      {name:'Bus Station', offset:10, pause:2},
-      {name:'Halte Europaweg', offset:14},
-      {name:'Halte Busdepot (eindpunt)', offset:16, type:'end'}
+      {name:'Bus Station', offset:10},
+      {name:'Halte Europaweg', offset:12},
+      {name:'Halte Busdepot (eindpunt)', offset:14, type:'end'}
     ]},
   '18': { number:'18', destination:'Leeuwarden Airport',
     stops: [
@@ -462,26 +462,26 @@ const busLines = {
       {name:'Centraal Station', offset:2, type:'start'},
       {name:'Halte Busdepot', offset:4},
       {name:'Leeuwarden Airport', offset:6},
-      {name:'Bus Station', offset:8, pause:2},
-      {name:'Halte Museumplein', offset:12},
-      {name:'Halte Malherplein', offset:14},
-      {name:'Halte Van Houtenlaan', offset:16},
-      {name:'Halte School', offset:18},
-      {name:'Halte Busdepot', offset:20},
-      {name:'Leeuwarden Airport (eindpunt)', offset:22, type:'end'}
+      {name:'Bus Station', offset:8},
+      {name:'Halte Museumplein', offset:10},
+      {name:'Halte Malherplein', offset:12},
+      {name:'Halte Van Houtenlaan', offset:14},
+      {name:'Halte School', offset:16},
+      {name:'Halte Busdepot', offset:18},
+      {name:'Leeuwarden Airport (eindpunt)', offset:20, type:'end'}
     ]},
   '27': { number:'27', destination:'Halte Busdepot',
     stops: [
       {name:'Garage Busdepot', offset:0, type:'garage'},
       {name:'Halte Wijk Station', offset:2, type:'start'},
       {name:'Halte Europaweg', offset:4},
-      {name:'Bus Station', offset:9, pause:2},
-      {name:'Medisch Centrum', offset:13},
-      {name:'Halte Malherplein', offset:15},
-      {name:'Halte Museumplein', offset:17},
-      {name:'Halte Veldstraat', offset:19},
-      {name:'Halte School', offset:21},
-      {name:'Halte Busdepot (eindpunt)', offset:23, type:'end'}
+      {name:'Bus Station', offset:6},
+      {name:'Medisch Centrum', offset:8},
+      {name:'Halte Malherplein', offset:10},
+      {name:'Halte Museumplein', offset:12},
+      {name:'Halte Veldstraat', offset:14},
+      {name:'Halte School', offset:16},
+      {name:'Halte Busdepot (eindpunt)', offset:18, type:'end'}
     ]},
   '5': { number:'5', destination:'Halte Busdepot',
     stops: [
@@ -490,15 +490,15 @@ const busLines = {
       {name:'Halte Van Houtenlaan', offset:4},
       {name:'Medisch Centrum', offset:6},
       {name:'Tijdelijke Halte Rotonde BD', offset:8},
-      {name:'Bus Station', offset:10, pause:2},
-      {name:'Centraal Station', offset:14},
-      {name:'Halte Europaweg', offset:16},
-      {name:'Tijdelijke Halte Rotonde BD', offset:18},
-      {name:'Medisch Centrum', offset:20},
-      {name:'Halte Van Houtenlaan', offset:22},
-      {name:'Halte School', offset:24},
-      {name:'Halte Busdepot', offset:26},
-      {name:'Halte Busdepot (eindpunt)', offset:28, type:'end'}
+      {name:'Bus Station', offset:10},
+      {name:'Centraal Station', offset:12},
+      {name:'Halte Europaweg', offset:14},
+      {name:'Tijdelijke Halte Rotonde BD', offset:16},
+      {name:'Medisch Centrum', offset:18},
+      {name:'Halte Van Houtenlaan', offset:20},
+      {name:'Halte School', offset:22},
+      {name:'Halte Busdepot', offset:24},
+      {name:'Halte Busdepot (eindpunt)', offset:26, type:'end'}
     ]}
 };
 
@@ -521,7 +521,6 @@ function fmtDate(d) {
   return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
 }
 
-/* --- LOGIN --- */
 window.dial = function(n) {
   if (enteredCode.length < 4) {
     enteredCode += n;
@@ -572,7 +571,6 @@ function updateClock() {
   if (elD2) elD2.textContent = n.getDate()+' '+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][n.getMonth()]+' '+n.getFullYear();
 }
 
-/* --- Sidebar --- */
 window.goHome = function() {
   currentStopIndex = -1;
   actualStart = null;
@@ -619,7 +617,6 @@ window.lockScreen = function() {
   }
 };
 
-/* --- Aankomsttijd --- */
 window.setArrival = function() {
   const v = document.getElementById('arrivalInput').value;
   if (!v) return;
@@ -638,15 +635,9 @@ window.setNow = function() {
 };
 
 function getTotalOffset(stops) {
-  let total = 0;
-  for (let s of stops) {
-    total += s.offset;
-    if (s.pause) total += s.pause;
-  }
-  return total;
+  return (stops.length - 1) * 2;
 }
 
-/* --- Lijn wisselen --- */
 window.switchLine = function(key) {
   if (!busLines[key]) return;
   currentLine = key;
@@ -667,11 +658,10 @@ window.switchLine = function(key) {
   for (let b of btns) { if (b.textContent.includes(key)) b.classList.add('active'); }
 };
 
-/* --- Rit besturing --- */
 window.depart = function() {
   if (!plannedArrival) setNow();
   actualStart = new Date();
-  currentStopIndex = 1; // Start bij eerste HALTE (index 1), garage is index 0
+  currentStopIndex = 1;
   totalDelayMin = 0;
   document.getElementById('hStatus').textContent = 'Actief';
   document.getElementById('btnVertrek').disabled = true;
@@ -684,7 +674,7 @@ window.nextStop = function() {
   
   const ref = getRef();
   if (ref && currentStopIndex < currentStops.length - 1) {
-    const plannedTime = new Date(ref.getTime() + getCumulativeOffset(currentStopIndex) * 60000);
+    const plannedTime = new Date(ref.getTime() + currentStopIndex * 2 * 60000);
     const now = new Date();
     const diff = (now - plannedTime) / 60000;
     if (diff > 0) totalDelayMin += diff;
@@ -699,23 +689,13 @@ window.nextStop = function() {
   render();
 };
 window.prevStop = function() {
-  if (currentStopIndex <= 1) return; // Niet terug naar garage
+  if (currentStopIndex <= 1) return;
   currentStopIndex--;
   document.getElementById('btnVolgende').disabled = false;
   if (currentStopIndex === 1) document.getElementById('btnTerug').disabled = true;
   render();
 };
 
-function getCumulativeOffset(stopIdx) {
-  let acc = 0;
-  for (let i = 0; i <= stopIdx; i++) {
-    acc += currentStops[i].offset;
-    if (currentStops[i].pause && i < stopIdx) acc += currentStops[i].pause;
-  }
-  return acc;
-}
-
-/* --- Helpers --- */
 function getStartTime() {
   if (!plannedArrival) return null;
   const total = getTotalOffset(currentStops);
@@ -726,10 +706,9 @@ function getRef() { return actualStart || getStartTime(); }
 function getPlannedTime(stopIdx) {
   const ref = getRef();
   if (!ref) return null;
-  return new Date(ref.getTime() + getCumulativeOffset(stopIdx) * 60000);
+  return new Date(ref.getTime() + stopIdx * 2 * 60000);
 }
 
-/* --- Render --- */
 function render() {
   const ref = getRef();
   const list = document.getElementById('stopList');
@@ -783,7 +762,6 @@ function render() {
     if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({block:'center'});
   }
 
-  /* Badge */
   const badge = document.getElementById('badge');
   if (!ref) {
     badge.textContent = 'Aankomst: --:--';
@@ -798,7 +776,6 @@ function render() {
     badge.textContent = 'Aankomst: --:--';
   }
 
-  /* Delay pill */
   const hDelay = document.getElementById('hDelay');
   const now = new Date();
   if (!ref || currentStopIndex < 1 || currentStopIndex >= currentStops.length-1) {
@@ -811,7 +788,6 @@ function render() {
   }
 }
 
-/* --- Actieknoppen --- */
 window.showInfo = function(stopName) {
   alert('Info: '+stopName+'\n\nHalte-informatie wordt geladen...');
 };
