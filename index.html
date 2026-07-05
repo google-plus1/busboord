@@ -1,371 +1,683 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – werkend</title>
-    <style>
-        :root {
-            --bg-cream: #E8E8D8;
-            --bg-light: #F0F0E0;
-            --green-pale: #C8D8B8;
-            --green-mid: #8FB87A;
-            --green-dark: #4A7A3A;
-            --red-alert: #D32F2F;
-            --orange-warn: #F57C00;
-            --text-dark: #2C2C2C;
-            --text-muted: #666;
-            --sidebar-bg: #D8D8C8;
-            --sidebar-btn: #C0C0B0;
-            --sidebar-btn-active: #8FB87A;
-            --sidebar-btn-hover: #B0B0A0;
-            --border-color: #B8B8A8;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; width: 100vw; overflow: hidden; background: #1a1a1a;
-            font-family: 'Segoe UI', 'Roboto', 'Inter', sans-serif;
-        }
-        .tablet-frame {
-            width: 100vw; height: 100vh; max-width: 1200px; max-height: 800px;
-            background: var(--bg-cream); display: flex; flex-direction: column;
-            overflow: hidden; position: relative; border-radius: 8px;
-        }
-        .page { display: none; flex-direction: column; height: 100%; width: 100%; }
-        .page.active { display: flex; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Arriva Boordcomputer</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    font-family:'Segoe UI','Source Sans Pro',sans-serif;
+  }
+  .tablet {
+    width:1280px;
+    height:720px;
+    max-width:96vw;
+    max-height:96vh;
+    background:#123247;
+    border:solid 24px #151515;
+    border-radius:6px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  /* --- Header --- */
+  .header {
+    height:40px;
+    background:#243847;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 14px;
+    color:#fff;
+    position:relative;
+    border-bottom:1px solid #3B5565;
+  }
+  .header-left { display:flex; align-items:center; gap:10px; z-index:2; }
+  .home-icon { 
+    width:16px; height:16px; 
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  .home-icon svg { width:14px; height:14px; fill:#fff; }
+  .status-icons { display:flex; gap:6px; align-items:center; }
+  .status-icon { width:14px; height:14px; display:flex; align-items:center; justify-content:center; }
+  .status-icon svg { width:12px; height:12px; fill:#fff; }
+  .h-line-num { font-weight:bold; font-size:18px; }
+  .h-status { font-size:18px; }
+  .header-center { position:absolute; left:50%; transform:translateX(-50%); font-size:13px; color:#C8D0D5; z-index:1; }
+  .header-right { display:flex; align-items:center; gap:10px; z-index:2; }
+  .delay-pill {
+    background:#fff;
+    color:#000;
+    padding:2px 7px;
+    border-radius:2px;
+    font-weight:bold;
+    font-size:13px;
+    min-width:46px;
+    text-align:center;
+  }
+  .h-timebox { text-align:right; line-height:1.2; }
+  .h-time { color:#000; font-weight:bold; font-size:16px; }
+  .h-date { color:#555; font-size:11px; }
 
-        .top-bar {
-            background: var(--bg-light); border-bottom: 2px solid var(--border-color);
-            padding: 6px 16px; display: flex; align-items: center;
-            justify-content: space-between; height: 40px;
-        }
-        .top-bar-left { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
-        .top-bar-left span { color: var(--text-dark); font-weight: 600; }
-        .main-layout { display: flex; flex: 1; overflow: hidden; }
-        .center-area { flex: 1; display: flex; flex-direction: column; padding: 12px 16px; gap: 10px; overflow: hidden; }
-        .right-sidebar {
-            width: 150px; background: var(--sidebar-bg);
-            border-left: 2px solid var(--border-color);
-            display: flex; flex-direction: column; padding: 8px 6px; gap: 6px;
-        }
-        .sidebar-btn {
-            width: 100%; padding: 10px 6px; border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--sidebar-btn); color: var(--text-dark);
-            font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;
-        }
-        .sidebar-btn:hover { background: var(--sidebar-btn-hover); }
-        .sidebar-btn.active { background: var(--sidebar-btn-active); color: white; border-color: var(--green-dark); }
+  /* --- Main layout --- */
+  .main { display:flex; flex:1; overflow:hidden; }
+  .sidebar {
+    width:85px;
+    background:#3FA7E0;
+    display:flex;
+    flex-direction:column;
+    flex-shrink:0;
+  }
+  .side-btn {
+    height:45px;
+    background:#3FA7E0;
+    border:none;
+    border-bottom:1px solid rgba(255,255,255,0.15);
+    color:#fff;
+    font-size:10px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    font-family:inherit;
+  }
+  .side-btn:hover { background:#2E95D0; }
+  .side-btn.active { background:#1E7AAF; }
+  .side-btn .ic { 
+    width:18px; height:18px; 
+    display:flex; align-items:center; justify-content:center;
+  }
+  .side-btn .ic svg { width:14px; height:14px; fill:#fff; }
 
-        .header-info { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-        .header-left { flex: 1; }
-        .line-number { font-size: 26px; font-weight: 900; color: var(--text-dark); }
-        .line-status { font-size: 13px; color: var(--text-muted); }
-        .destination { font-size: 17px; font-weight: 600; color: var(--text-dark); }
-        .delay-box {
-            width: 85px; height: 65px; background: var(--green-dark);
-            border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px; font-weight: 900; font-family: 'Courier New', monospace;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-        .delay-box.red { background: var(--red-alert); }
-        .delay-box.yellow { background: var(--orange-warn); }
+  /* --- Content --- */
+  .content {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:#123247;
+  }
+  .time-bar {
+    height:36px;
+    background:#1a3a52;
+    border-bottom:1px solid #3B5565;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 14px;
+    color:#C8D0D5;
+    font-size:13px;
+    flex-shrink:0;
+  }
+  .time-bar label { font-weight:600; }
+  .time-bar input[type="time"] {
+    background:#123247;
+    border:1px solid #3B5565;
+    color:#fff;
+    padding:3px 8px;
+    font-size:13px;
+    font-family:inherit;
+  }
+  .time-bar button {
+    background:#3E8CC8;
+    border:none;
+    color:#fff;
+    padding:4px 12px;
+    cursor:pointer;
+    font-size:12px;
+    font-family:inherit;
+  }
+  .stop-list { flex:1; overflow-y:auto; }
+  .stop-row {
+    display:flex;
+    align-items:center;
+    height:40px;
+    padding:0 14px;
+    border-bottom:1px solid #3B5565;
+    color:#fff;
+    font-size:17px;
+    position:relative;
+  }
+  .stop-row.past { opacity:0.35; }
+  .stop-row.active { background:#667B2D; }
+  .stop-row.active .stop-name { font-weight:bold; font-size:18px; }
+  .stop-row.active .stop-time { font-weight:bold; font-size:16px; }
+  .stop-dot {
+    width:10px; height:10px;
+    background:#fff;
+    border-radius:50%;
+    margin-right:12px;
+    flex-shrink:0;
+  }
+  .stop-h {
+    width:26px; height:26px;
+    background:#667B2D;
+    border-radius:50%;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:14px;
+    margin-right:12px;
+    flex-shrink:0;
+  }
+  .stop-start-icon {
+    width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    margin-right:12px;
+    flex-shrink:0;
+  }
+  .stop-start-icon svg { width:16px; height:16px; fill:#fff; }
+  .stop-name {
+    flex:1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .stop-rit {
+    font-size:12px;
+    color:#C8D0D5;
+    margin-right:14px;
+    white-space:nowrap;
+  }
+  .stop-time {
+    font-size:15px;
+    margin-right:10px;
+    font-family:'Segoe UI',monospace;
+    white-space:nowrap;
+    min-width:44px;
+    text-align:right;
+  }
+  .stop-actions { display:flex; gap:4px; flex-shrink:0; }
+  .act-btn {
+    width:24px; height:24px;
+    background:#3E8CC8;
+    border:none;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:11px;
+    padding:0;
+  }
+  .act-btn svg { width:12px; height:12px; fill:#fff; }
 
-        .stop-list {
-            flex: 1; overflow-y: auto; border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--green-pale); padding: 8px;
-        }
-        .stop-item {
-            display: flex; align-items: center; padding: 7px 12px;
-            border-radius: 6px; font-size: 13px; border-left: 4px solid transparent;
-            color: var(--text-dark);
-        }
-        .stop-item.current { background: rgba(255,255,255,0.75); border-left-color: var(--orange-warn); font-weight: 700; }
-        .stop-item.past { opacity: 0.45; text-decoration: line-through; }
-        .stop-name { flex: 1; }
-        .stop-time { font-weight: 600; color: var(--text-muted); margin-right: 8px; }
+  /* --- Right panel (line switch) --- */
+  .right-panel {
+    width:110px;
+    background:#1a3a52;
+    border-left:1px solid #3B5565;
+    display:flex;
+    flex-direction:column;
+    padding:6px;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .line-btn {
+    padding:8px;
+    background:#2a5a82;
+    border:1px solid #3B5565;
+    color:#fff;
+    font-size:12px;
+    cursor:pointer;
+    text-align:center;
+    font-family:inherit;
+  }
+  .line-btn:hover { background:#3E8CC8; }
+  .line-btn.active { background:#3FA7E0; border-color:#3FA7E0; }
 
-        .bottom-bar {
-            background: var(--bg-light); border-top: 2px solid var(--border-color);
-            padding: 8px 16px; display: flex; align-items: center;
-            justify-content: space-between; height: 52px;
-        }
-        .bottom-left { display: flex; gap: 8px; }
-        .bottom-btn {
-            padding: 8px 18px; border-radius: 6px; border: none;
-            font-size: 13px; font-weight: 700; cursor: pointer; color: white;
-        }
-        .bottom-btn.green { background: var(--green-dark); }
-        .bottom-btn.blue { background: #1976D2; }
-        .bottom-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .bottom-right { display: flex; align-items: center; gap: 14px; }
-        .arrival-badge {
-            background: var(--green-dark); color: white;
-            padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;
-        }
-        .clock-time { font-size: 20px; font-weight: 700; }
-        .clock-date { font-size: 11px; color: var(--text-muted); }
-
-        .time-selector { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-        .time-selector label { font-size: 14px; font-weight: 600; color: var(--text-dark); }
-        .time-selector input[type="time"] {
-            padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);
-            font-size: 14px; background: white; color: var(--text-dark);
-        }
-        .time-selector button {
-            padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color);
-            background: var(--sidebar-btn); font-weight: 600; cursor: pointer;
-        }
-    </style>
+  /* --- Bottom bar --- */
+  .bottom {
+    height:48px;
+    background:#243847;
+    border-top:1px solid #3B5565;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 14px;
+    flex-shrink:0;
+  }
+  .bottom-left { display:flex; gap:8px; }
+  .btn {
+    padding:8px 18px;
+    border:none;
+    border-radius:3px;
+    font-size:13px;
+    font-weight:bold;
+    cursor:pointer;
+    color:#fff;
+    font-family:inherit;
+    display:flex; align-items:center; gap:6px;
+  }
+  .btn-green { background:#4a7c3a; }
+  .btn-blue { background:#1976d2; }
+  .btn:disabled { opacity:0.3; cursor:not-allowed; }
+  .btn svg { width:14px; height:14px; fill:#fff; }
+  .bottom-right { display:flex; align-items:center; gap:14px; color:#fff; }
+  .badge {
+    background:#667B2D;
+    padding:5px 12px;
+    border-radius:12px;
+    font-size:12px;
+    font-weight:bold;
+  }
+  .clock-box { text-align:right; line-height:1.2; }
+  .clock-big { font-size:18px; font-weight:bold; }
+  .clock-small { font-size:11px; color:#C8D0D5; }
+</style>
+<base target="_blank">
 </head>
 <body>
-<div class="tablet-frame">
-    <div class="page active" id="pageHome">
-        <div class="top-bar">
-            <div class="top-bar-left">
-                <span id="topDate"></span><span>|</span>
-                <span>Lijn <span id="topLineNum">54</span></span><span>|</span>
-                <span>Bestuurder: J. de Vries</span><span>|</span>
-                <span>Omloop: A</span>
-            </div>
-        </div>
-        <div class="main-layout">
-            <div class="center-area">
-                <div class="header-info">
-                    <div class="header-left">
-                        <div class="line-number" id="lineNumber">X Geen Dienst</div>
-                        <div class="line-status" id="lineStatus">In dienst</div>
-                        <div class="destination" id="destination">Halte Busdepot</div>
-                        <div class="time-selector">
-                            <label for="startTimeInput">Geplande vertrek:</label>
-                            <input type="time" id="startTimeInput" onchange="setPlannedTime()">
-                            <button onclick="setNow()">Nu</button>
-                        </div>
-                    </div>
-                    <div class="delay-box green" id="delayBox">0</div>
-                </div>
-                <div class="stop-list" id="stopList"></div>
-            </div>
-            <div class="right-sidebar">
-                <button class="sidebar-btn active" onclick="switchLine('54')">🚌 Lijn 54</button>
-                <button class="sidebar-btn" onclick="switchLine('18')">🚌 Lijn 18</button>
-                <button class="sidebar-btn" onclick="switchLine('27')">🚌 Lijn 27</button>
-                <button class="sidebar-btn" onclick="switchLine('42')">🚌 Lijn 42</button>
-            </div>
-        </div>
-        <div class="bottom-bar">
-            <div class="bottom-left">
-                <button class="bottom-btn green" id="btnVertrek" onclick="depart()">🚌 Vertrek</button>
-                <button class="bottom-btn blue" id="btnVolgende" onclick="nextStop()" disabled>⏭ Volgende</button>
-                <button class="bottom-btn blue" id="btnTerug" onclick="prevStop()" disabled>⏮ Terug</button>
-            </div>
-            <div class="bottom-right">
-                <div class="arrival-badge" id="arrivalBadge">Vertrek: --:--</div>
-                <div>
-                    <div class="clock-time" id="clockTime">00:00:00</div>
-                    <div class="clock-date" id="clockDate">5 juli 2026</div>
-                </div>
-            </div>
-        </div>
+
+<div class="tablet">
+  <div class="header">
+    <div class="header-left">
+      <div class="home-icon" onclick="goHome()">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      </div>
+      <div class="status-icons">
+        <div class="status-icon" title="WiFi"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-4-4l2 2a7.074 7.074 0 0 1 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div>
+        <div class="status-icon" title="GPS"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+        <div class="status-icon" title="Voertuig"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg></div>
+        <div class="status-icon" title="Berichten"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg></div>
+      </div>
+      <span class="h-line-num" id="hLineNum">54</span>
+      <span class="h-status" id="hStatus">Sorry, geen dienst</span>
     </div>
+    <div class="header-center" id="hRit">Rit 805519</div>
+    <div class="header-right">
+      <div class="delay-pill" id="hDelay">+0,00</div>
+      <div class="h-timebox">
+        <div class="h-time" id="clockTime">07:53:00</div>
+        <div class="h-date" id="clockDate">05-07-2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <button class="side-btn" onclick="togglePlay()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+      </button>
+      <button class="side-btn" onclick="showMeldingen()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div>
+        <span>Meldingen</span>
+      </button>
+      <button class="side-btn" onclick="showMededelingen()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+        <span>Meded.</span>
+      </button>
+      <button class="side-btn" onclick="showKaart()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M20.5 3l-6 1.5-6-1.5-5.5 1.4v15.1l5.5-1.4 6 1.5 6-1.5 5.5 1.4V4.4L20.5 3zM15 17.5l-6-1.5V5.5l6 1.5v10.5z"/></svg></div>
+        <span>Kaart</span>
+      </button>
+      <button class="side-btn active" onclick="showRit()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg></div>
+        <span>Rit</span>
+      </button>
+      <button class="side-btn" onclick="showRitten()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg></div>
+        <span>Ritten</span>
+      </button>
+      <button class="side-btn" onclick="showLijnfilm()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z"/></svg></div>
+        <span>Lijnfilm</span>
+      </button>
+      <button class="side-btn" onclick="lockScreen()">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
+        <span>Afsluit</span>
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="time-bar">
+        <label>Geplande aankomst eindpunt:</label>
+        <input type="time" id="arrivalInput" onchange="setArrival()">
+        <button onclick="setNow()">Nu</button>
+      </div>
+      <div class="stop-list" id="stopList"></div>
+    </div>
+
+    <div class="right-panel">
+      <button class="line-btn active" onclick="switchLine('54')">Lijn 54</button>
+      <button class="line-btn" onclick="switchLine('18')">Lijn 18</button>
+      <button class="line-btn" onclick="switchLine('27')">Lijn 27</button>
+      <button class="line-btn" onclick="switchLine('42')">Lijn 42</button>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="bottom-left">
+      <button class="btn btn-green" id="btnVertrek" onclick="depart()">
+        <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        Vertrek
+      </button>
+      <button class="btn btn-blue" id="btnVolgende" onclick="nextStop()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+        Volgende
+      </button>
+      <button class="btn btn-blue" id="btnTerug" onclick="prevStop()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        Terug
+      </button>
+    </div>
+    <div class="bottom-right">
+      <div class="badge" id="badge">Aankomst: --:--</div>
+      <div class="clock-box">
+        <div class="clock-big" id="clockTime2">07:53:00</div>
+        <div class="clock-small" id="clockDate2">5 juli 2026</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    const busLines = {
-        '54': { number:'54', destination:'Halte Busdepot',
-            stops: [
-                {name:'Medisch Centrum', offset:0, type:'start'},
-                {name:'Tijdelijke Halte Rotonde BD', offset:2},{name:'Halte Museumplein', offset:4},{name:'Halte Malherplein', offset:6},
-                {name:'Bus Station', offset:8},{name:'Halte Europaweg', offset:10},{name:'Halte Busdepot (eindpunt)', offset:12, type:'end'}
-            ]},
-        '18': { number:'18', destination:'Leeuwarden Airport',
-            stops: [
-                {name:'Centraal Station', offset:0, type:'start'},
-                {name:'Halte Busdepot', offset:2},{name:'Leeuwarden Airport', offset:4},{name:'Bus Station', offset:6},
-                {name:'Halte Museumplein', offset:8},{name:'Halte Malherplein', offset:10},{name:'Halte Van Houtenlaan', offset:12},
-                {name:'Halte School', offset:14},{name:'Halte Busdepot', offset:16},{name:'Leeuwarden Airport (eindpunt)', offset:18, type:'end'}
-            ]},
-        '27': { number:'27', destination:'Halte Busdepot',
-            stops: [
-                {name:'Halte Wijk Station', offset:0, type:'start'},
-                {name:'Halte Europaweg', offset:2},{name:'Bus Station', offset:7},{name:'Medisch Centrum', offset:9},
-                {name:'Halte Malherplein', offset:11},{name:'Halte Museumplein', offset:13},{name:'Halte Veldstraat', offset:15},
-                {name:'Halte School', offset:17},{name:'Halte Busdepot (eindpunt)', offset:19, type:'end'}
-            ]},
-        '42': { number:'42', destination:'Halte Busdepot',
-            stops: [
-                {name:'Halte Veldstraat', offset:0, type:'start'},
-                {name:'Halte Van Houtenlaan', offset:2},{name:'Medisch Centrum', offset:4},{name:'Tijdelijke Halte Rotonde BD', offset:6},
-                {name:'Bus Station', offset:8},{name:'Centraal Station', offset:10},{name:'Halte Europaweg', offset:12},
-                {name:'Tijdelijke Halte Rotonde BD', offset:14},{name:'Medisch Centrum', offset:16},{name:'Halte Van Houtenlaan', offset:18},
-                {name:'Halte School', offset:20},{name:'Halte Busdepot', offset:22},{name:'Halte Busdepot (eindpunt)', offset:24, type:'end'}
-            ]}
-    };
+const busLines = {
+  '54': { number:'54', destination:'Halte Busdepot',
+    stops: [
+      {name:'Medisch Centrum', offset:0, type:'start'},
+      {name:'Tijdelijke Halte Rotonde BD', offset:2},
+      {name:'Halte Museumplein', offset:4},
+      {name:'Halte Malherplein', offset:6},
+      {name:'Bus Station', offset:8},
+      {name:'Halte Europaweg', offset:10},
+      {name:'Halte Busdepot (eindpunt)', offset:12, type:'end'}
+    ]},
+  '18': { number:'18', destination:'Leeuwarden Airport',
+    stops: [
+      {name:'Centraal Station', offset:0, type:'start'},
+      {name:'Halte Busdepot', offset:2},
+      {name:'Leeuwarden Airport', offset:4},
+      {name:'Bus Station', offset:6},
+      {name:'Halte Museumplein', offset:8},
+      {name:'Halte Malherplein', offset:10},
+      {name:'Halte Van Houtenlaan', offset:12},
+      {name:'Halte School', offset:14},
+      {name:'Halte Busdepot', offset:16},
+      {name:'Leeuwarden Airport (eindpunt)', offset:18, type:'end'}
+    ]},
+  '27': { number:'27', destination:'Halte Busdepot',
+    stops: [
+      {name:'Halte Wijk Station', offset:0, type:'start'},
+      {name:'Halte Europaweg', offset:2},
+      {name:'Bus Station', offset:7},
+      {name:'Medisch Centrum', offset:9},
+      {name:'Halte Malherplein', offset:11},
+      {name:'Halte Museumplein', offset:13},
+      {name:'Halte Veldstraat', offset:15},
+      {name:'Halte School', offset:17},
+      {name:'Halte Busdepot (eindpunt)', offset:19, type:'end'}
+    ]},
+  '42': { number:'42', destination:'Halte Busdepot',
+    stops: [
+      {name:'Halte Veldstraat', offset:0, type:'start'},
+      {name:'Halte Van Houtenlaan', offset:2},
+      {name:'Medisch Centrum', offset:4},
+      {name:'Tijdelijke Halte Rotonde BD', offset:6},
+      {name:'Bus Station', offset:8},
+      {name:'Centraal Station', offset:10},
+      {name:'Halte Europaweg', offset:12},
+      {name:'Tijdelijke Halte Rotonde BD', offset:14},
+      {name:'Medisch Centrum', offset:16},
+      {name:'Halte Van Houtenlaan', offset:18},
+      {name:'Halte School', offset:20},
+      {name:'Halte Busdepot', offset:22},
+      {name:'Halte Busdepot (eindpunt)', offset:24, type:'end'}
+    ]}
+};
 
-    let currentLine = '54';
-    let currentStops = busLines['54'].stops;
-    let plannedStart = null;    // Date object
-    let actualStart = null;     // Date object
-    let currentStopIndex = -1;
+let currentLine = '54';
+let currentStops = busLines['54'].stops;
+let plannedArrival = null;
+let actualStart = null;
+let currentStopIndex = -1;
+let isPlaying = false;
 
-    function formatTime(d) { return d ? `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '--:--'; }
+function fmtTime(d) {
+  if (!d) return '--:--';
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function fmtDate(d) {
+  return String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
+}
 
-    // ---- Klok ----
-    function updateClock() {
-        const n = new Date();
-        document.getElementById('clockTime').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
-        const m = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-        document.getElementById('clockDate').textContent = `${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;
-        document.getElementById('topDate').textContent = document.getElementById('clockDate').textContent;
+function updateClock() {
+  const n = new Date();
+  const t = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+  document.getElementById('clockTime').textContent = t;
+  document.getElementById('clockTime2').textContent = t;
+  document.getElementById('clockDate').textContent = fmtDate(n);
+  document.getElementById('clockDate2').textContent = n.getDate()+' '+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][n.getMonth()]+' '+n.getFullYear();
+}
+
+/* --- Sidebar functionaliteit --- */
+window.goHome = function() {
+  currentStopIndex = -1;
+  actualStart = null;
+  plannedArrival = null;
+  document.getElementById('hStatus').textContent = 'Sorry, geen dienst';
+  document.getElementById('btnVertrek').disabled = false;
+  document.getElementById('btnVolgende').disabled = true;
+  document.getElementById('btnTerug').disabled = true;
+  setNow();
+  render();
+};
+
+window.togglePlay = function() {
+  isPlaying = !isPlaying;
+  const btn = document.querySelector('.side-btn');
+  btn.innerHTML = isPlaying 
+    ? '<div class="ic"><svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></div>'
+    : '<div class="ic"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>';
+};
+
+window.showMeldingen = function() {
+  alert('Meldingen: Geen nieuwe meldingen.');
+};
+
+window.showMededelingen = function() {
+  alert('Mededelingen: Geen mededelingen.');
+};
+
+window.showKaart = function() {
+  alert('Kaart: GPS-navigatie wordt geladen...');
+};
+
+window.showRit = function() {
+  document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.side-btn')[4].classList.add('active');
+  // Herstel rit weergave
+  const content = document.querySelector('.content');
+  content.innerHTML = '<div class="time-bar"><label>Geplande aankomst eindpunt:</label><input type="time" id="arrivalInput" onchange="setArrival()"><button onclick="setNow()">Nu</button></div><div class="stop-list" id="stopList"></div>';
+  render();
+};
+
+window.showRitten = function() {
+  const content = document.querySelector('.content');
+  content.innerHTML = '<div style="padding:20px; color:#fff;"><h2 style="margin-bottom:20px;">Ritinstelling</h2><p style="color:#C8D0D5;">Kies rit o.a.</p><div style="margin-top:20px; color:#C8D0D5; line-height:2;">10:11&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;ESA/ESTEC (Katwijk)&nbsp;&nbsp;&nbsp;Route 10<br>12:28&nbsp;&nbsp;&nbsp;Lijn 400&nbsp;&nbsp;&nbsp;Ingang Lagerweg Stalling&nbsp;&nbsp;&nbsp;Route 15<br>12:36&nbsp;&nbsp;&nbsp;Lijn 400&nbsp;&nbsp;&nbsp;Centrum-West&nbsp;&nbsp;&nbsp;Route 12<br>13:31&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;Centrum-West&nbsp;&nbsp;&nbsp;Route 10<br>14:26&nbsp;&nbsp;&nbsp;Lijn 401&nbsp;&nbsp;&nbsp;Boulevard-Zuid&nbsp;&nbsp;&nbsp;Route 19</div></div>';
+};
+
+window.showLijnfilm = function() {
+  alert('Lijnfilm: Video wordt geladen...');
+};
+
+window.lockScreen = function() {
+  if (confirm('Scherm vergrendelen?')) {
+    document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-size:24px;"><div style="text-align:center;"><svg width="60" height="60" viewBox="0 0 24 24" fill="#fff"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg><br><br>Scherm vergrendeld<br><br><button onclick="location.reload()" style="padding:10px 20px;background:#3FA7E0;border:none;color:#fff;cursor:pointer;font-size:16px;">Ontgrendelen</button></div></div>';
+  }
+};
+
+/* --- Aankomsttijd instellen (eindpunt) --- */
+window.setArrival = function() {
+  const v = document.getElementById('arrivalInput').value;
+  if (!v) return;
+  const [h,m] = v.split(':');
+  const now = new Date();
+  plannedArrival = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
+  render();
+};
+window.setNow = function() {
+  const n = new Date();
+  const total = currentStops[currentStops.length-1].offset;
+  const arr = new Date(n.getTime() + total*60000);
+  document.getElementById('arrivalInput').value = String(arr.getHours()).padStart(2,'0')+':'+String(arr.getMinutes()).padStart(2,'0');
+  setArrival();
+};
+
+/* --- Lijn wisselen --- */
+window.switchLine = function(key) {
+  if (!busLines[key]) return;
+  currentLine = key;
+  currentStops = busLines[key].stops;
+  currentStopIndex = -1;
+  actualStart = null;
+  plannedArrival = null;
+  document.getElementById('hLineNum').textContent = busLines[key].number;
+  document.getElementById('hStatus').textContent = 'Sorry, geen dienst';
+  document.getElementById('btnVertrek').disabled = false;
+  document.getElementById('btnVolgende').disabled = true;
+  document.getElementById('btnTerug').disabled = true;
+  setNow();
+  render();
+  document.querySelectorAll('.line-btn').forEach(b=>b.classList.remove('active'));
+  const btns = document.querySelectorAll('.line-btn');
+  for (let b of btns) { if (b.textContent.includes(key)) b.classList.add('active'); }
+};
+
+/* --- Rit besturing --- */
+window.depart = function() {
+  if (!plannedArrival) setNow();
+  actualStart = new Date();
+  currentStopIndex = 0;
+  document.getElementById('hStatus').textContent = 'Actief';
+  document.getElementById('btnVertrek').disabled = true;
+  document.getElementById('btnVolgende').disabled = false;
+  document.getElementById('btnTerug').disabled = true;
+  render();
+};
+window.nextStop = function() {
+  if (currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
+  currentStopIndex++;
+  if (currentStopIndex === currentStops.length-1) {
+    document.getElementById('btnVolgende').disabled = true;
+    document.getElementById('hStatus').textContent = 'Eindbestemming';
+  }
+  document.getElementById('btnTerug').disabled = false;
+  render();
+};
+window.prevStop = function() {
+  if (currentStopIndex <= 0) return;
+  currentStopIndex--;
+  document.getElementById('btnVolgende').disabled = false;
+  if (currentStopIndex === 0) document.getElementById('btnTerug').disabled = true;
+  render();
+};
+
+/* --- Helpers --- */
+function getStartTime() {
+  if (!plannedArrival) return null;
+  const total = currentStops[currentStops.length-1].offset;
+  return new Date(plannedArrival.getTime() - total*60000);
+}
+function getRef() { return actualStart || getStartTime(); }
+
+/* --- Render --- */
+function render() {
+  const ref = getRef();
+  const list = document.getElementById('stopList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  currentStops.forEach((s,i) => {
+    const row = document.createElement('div');
+    row.className = 'stop-row';
+    if (i < currentStopIndex) row.classList.add('past');
+    if (i === currentStopIndex) row.classList.add('active');
+
+    let left = '';
+    if (i === currentStopIndex && s.type !== 'start') {
+      left = '<div class="stop-h">H</div>';
+    } else if (s.type === 'start') {
+      left = '<div class="stop-start-icon"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg></div>';
+    } else {
+      left = '<div class="stop-dot"></div>';
     }
 
-    // ---- Geplande tijd ----
-    window.setPlannedTime = function() {
-        const v = document.getElementById('startTimeInput').value;
-        if (!v) return;
-        const [h,m] = v.split(':');
-        const now = new Date();
-        plannedStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
-        if (!actualStart) renderStops();
-        updateArrivalBadge();
-    };
-    window.setNow = function() {
-        const n = new Date();
-        document.getElementById('startTimeInput').value = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-        setPlannedTime();
-    };
+    const t = ref ? new Date(ref.getTime() + s.offset*60000) : null;
+    const timeStr = fmtTime(t);
+    const ritText = (i === 0) ? 'Rit '+currentLine+'/1042' : '';
 
-    // ---- Lijn wisselen ----
-    window.switchLine = function(lineKey) {
-        if (!busLines[lineKey]) return;
-        currentLine = lineKey;
-        currentStops = busLines[lineKey].stops;
-        currentStopIndex = -1;
-        actualStart = null;
-        plannedStart = null;
-        document.getElementById('lineNumber').textContent = busLines[lineKey].number + ' Geen Dienst';
-        document.getElementById('destination').textContent = busLines[lineKey].destination;
-        document.getElementById('topLineNum').textContent = busLines[lineKey].number;
-        document.getElementById('lineStatus').textContent = 'In dienst';
-        document.getElementById('btnVertrek').disabled = false;
-        document.getElementById('btnVolgende').disabled = true;
-        document.getElementById('btnTerug').disabled = true;
-        setNow();
-        updateAll();
-        document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-        const btns = document.querySelectorAll(`.sidebar-btn[onclick*="switchLine('${lineKey}')"]`);
-        if (btns.length) btns[0].classList.add('active');
-    };
+    const actions = (i === currentStopIndex)
+      ? '<div class="stop-actions"><button class="act-btn" onclick="showInfo(\''+s.name+'\')" title="Info"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button><button class="act-btn" onclick="showBlock(\''+s.name+'\')" title="Blokkeren"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg></button></div>'
+      : '<div class="stop-actions" style="visibility:hidden;"><button class="act-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button><button class="act-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg></button></div>';
 
-    // ---- Reis besturing ----
-    window.depart = function() {
-        if (!plannedStart) setNow();
-        actualStart = new Date();
-        currentStopIndex = 0;
-        document.getElementById('lineStatus').textContent = 'In dienst - Actief';
-        document.getElementById('btnVertrek').disabled = true;
-        document.getElementById('btnVolgende').disabled = false;
-        document.getElementById('btnTerug').disabled = true;
-        updateAll();
-    };
-    window.nextStop = function() {
-        if (currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
-        currentStopIndex++;
-        if (currentStopIndex === currentStops.length-1) {
-            document.getElementById('btnVolgende').disabled = true;
-            document.getElementById('lineStatus').textContent = 'Eindbestemming bereikt';
-        }
-        document.getElementById('btnTerug').disabled = false;
-        updateAll();
-    };
-    window.prevStop = function() {
-        if (currentStopIndex <= 0) return;
-        currentStopIndex--;
-        document.getElementById('btnVolgende').disabled = false;
-        if (currentStopIndex === 0) document.getElementById('btnTerug').disabled = true;
-        updateAll();
-    };
+    row.innerHTML = left +
+      '<div class="stop-name">'+s.name+'</div>' +
+      '<div class="stop-rit">'+ritText+'</div>' +
+      '<div class="stop-time">'+timeStr+'</div>' +
+      actions;
+    list.appendChild(row);
+  });
 
-    function updateAll() {
-        updateDelayBox();
-        updateArrivalBadge();
-        renderStops();
-    }
+  if (currentStopIndex >= 0) {
+    const items = list.querySelectorAll('.stop-row');
+    if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({block:'center'});
+  }
 
-    function updateDelayBox() {
-        const box = document.getElementById('delayBox');
-        const ref = actualStart || plannedStart;
-        if (!ref || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) {
-            box.textContent = '0';
-            box.className = 'delay-box green';
-            return;
-        }
-        const now = new Date();
-        const nextTime = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
-        const diffSec = Math.round((now - nextTime)/1000);
-        function fmt(sec) {
-            if (sec <= -60) {
-                let abs = Math.abs(sec), mins = Math.floor(abs/60), half = (abs%60)>=30?0.5:0;
-                let val = mins+half;
-                return {text:'-'+(val%1===0?val:Math.floor(val)+'½'), color:'red'};
-            } else if (sec <= -30) return {text:'-½', color:'yellow'};
-            else if (sec < 60) return {text:'0', color:'green'};
-            else {
-                let mins = Math.floor(sec/60), half = (sec%60)>=30?0.5:0;
-                let val = mins+half;
-                return {text:'+'+(val%1===0?val:Math.floor(val)+'½'), color:'red'};
-            }
-        }
-        const {text,color} = fmt(diffSec);
-        box.textContent = text;
-        box.className = `delay-box ${color}`;
-    }
+  /* Badge */
+  const badge = document.getElementById('badge');
+  if (!ref) {
+    badge.textContent = 'Aankomst: --:--';
+  } else if (currentStopIndex === -1 && plannedArrival && !actualStart) {
+    badge.textContent = 'Aankomst: '+fmtTime(plannedArrival);
+  } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length-1) {
+    const next = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
+    badge.textContent = 'Aankomst: '+fmtTime(next);
+  } else if (currentStopIndex >= currentStops.length-1) {
+    badge.textContent = 'Eindbestemming';
+  } else {
+    badge.textContent = 'Aankomst: --:--';
+  }
 
-    function updateArrivalBadge() {
-        const badge = document.getElementById('arrivalBadge');
-        const ref = actualStart || plannedStart;
-        if (!ref) { badge.textContent = 'Vertrek: --:--'; return; }
-        if (currentStopIndex === -1 && plannedStart && !actualStart) {
-            badge.textContent = `Vertrek: ${formatTime(plannedStart)}`;
-        } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length-1) {
-            const next = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
-            badge.textContent = `Aankomst: ${formatTime(next)}`;
-        } else if (currentStopIndex >= currentStops.length-1) {
-            badge.textContent = 'Eindbestemming';
-        } else {
-            badge.textContent = 'Vertrek: --:--';
-        }
-    }
+  /* Delay pill */
+  const hDelay = document.getElementById('hDelay');
+  if (!ref || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) {
+    hDelay.textContent = '+0,00';
+  } else {
+    const now = new Date();
+    const nextTime = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
+    const diffMin = (now - nextTime) / 60000;
+    const sign = diffMin >= 0 ? '+' : '';
+    hDelay.textContent = sign + diffMin.toFixed(2).replace('.',',');
+  }
+}
 
-    function renderStops() {
-        const list = document.getElementById('stopList');
-        list.innerHTML = '';
-        const ref = actualStart || plannedStart || null;
-        currentStops.forEach((s,i) => {
-            const d = document.createElement('div');
-            d.className = 'stop-item';
-            if (i === currentStopIndex) d.classList.add('current');
-            if (i < currentStopIndex) d.classList.add('past');
-            if (s.type === 'start') d.classList.add('start');
-            if (s.type === 'end') d.classList.add('end');
-            const t = ref ? new Date(ref.getTime() + s.offset*60000) : null;
-            d.innerHTML = `<span class="stop-name">${s.name}</span><span class="stop-time">${t ? formatTime(t) : '--:--'}</span>`;
-            list.appendChild(d);
-        });
-        if (currentStopIndex >= 0) {
-            const items = list.querySelectorAll('.stop-item');
-            if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }
+/* --- Actieknoppen functionaliteit --- */
+window.showInfo = function(stopName) {
+  alert('Info: '+stopName+'\n\nHalte-informatie wordt geladen...');
+};
+window.showBlock = function(stopName) {
+  alert('Blokkeren: '+stopName+'\n\nHalte is nu geblokkeerd.');
+};
 
-    // Start
-    setInterval(() => { updateClock(); updateDelayBox(); updateArrivalBadge(); }, 1000);
-    updateClock();
-    setNow();
-    renderStops();
-    document.querySelector('.sidebar-btn[onclick*="switchLine(\'54\')"]').classList.add('active');
+/* --- Start --- */
+setInterval(() => { updateClock(); render(); }, 1000);
+updateClock();
+setNow();
+render();
 </script>
 </body>
 </html>
