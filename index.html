@@ -16,7 +16,6 @@
     overflow:hidden;
     font-family:'Segoe UI','Source Sans Pro',sans-serif;
   }
-  /* --- LOGIN --- */
   .login-overlay {
     position:fixed; top:0; left:0; width:100vw; height:100vh;
     background:#0a1628; z-index:9999;
@@ -57,7 +56,6 @@
     flex-direction:column;
     overflow:hidden;
   }
-  /* --- Header --- */
   .header {
     height:64px;
     background:#243847;
@@ -97,7 +95,6 @@
   .h-time { color:#fff; font-weight:900; font-size:26px; }
   .h-date { color:#aaa; font-size:14px; font-weight:700; }
 
-  /* --- Main layout --- */
   .main { display:flex; flex:1; overflow:hidden; }
   .sidebar {
     width:110px;
@@ -130,7 +127,6 @@
   }
   .side-btn .ic svg { width:20px; height:20px; fill:#fff; }
 
-  /* --- Content --- */
   .content {
     flex:1;
     display:flex;
@@ -257,7 +253,6 @@
   }
   .act-btn svg { width:18px; height:18px; fill:#fff; }
 
-  /* --- Right panel --- */
   .right-panel {
     width:150px;
     background:#1a3a52;
@@ -283,7 +278,6 @@
   .line-btn:hover { background:#3E8CC8; }
   .line-btn.active { background:#3FA7E0; border-color:#3FA7E0; }
 
-  /* --- Bottom bar --- */
   .bottom {
     height:72px;
     background:#243847;
@@ -318,16 +312,6 @@
     font-size:16px;
     font-weight:900;
   }
-  .countdown-box {
-    background:#fff;
-    padding:10px 20px;
-    border-radius:2px;
-    font-size:22px;
-    font-weight:900;
-    color:#000;
-    min-width:100px;
-    text-align:center;
-  }
   .clock-box { text-align:right; line-height:1.3; }
   .clock-big { font-size:26px; font-weight:900; color:#fff; }
   .clock-small { font-size:14px; color:#C8D0D5; font-weight:700; }
@@ -335,7 +319,6 @@
 </head>
 <body>
 
-<!-- LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <div class="login-title">VOER CODE IN</div>
@@ -451,7 +434,6 @@
       </button>
     </div>
     <div class="bottom-right">
-      <div class="countdown-box" id="countdownBox">0,0</div>
       <div class="badge" id="badge">Aankomst: --:--</div>
       <div class="clock-box">
         <div class="clock-big" id="clockTime2">07:53:00</div>
@@ -465,43 +447,46 @@
 const busLines = {
   '54': { number:'54', destination:'Halte Busdepot',
     stops: [
-      {name:'Garage Busdepot', offset:0, type:'start'},
-      {name:'Tijdelijke Halte Rotonde BD', offset:2},
-      {name:'Halte Museumplein', offset:4},
-      {name:'Halte Malherplein', offset:6},
-      {name:'Bus Station', offset:8, pause:2},
-      {name:'Halte Europaweg', offset:12},
-      {name:'Halte Busdepot (eindpunt)', offset:14, type:'end'}
+      {name:'Garage Busdepot', offset:0, type:'garage'},
+      {name:'Medisch Centrum', offset:2, type:'start'},
+      {name:'Tijdelijke Halte Rotonde BD', offset:4},
+      {name:'Halte Museumplein', offset:6},
+      {name:'Halte Malherplein', offset:8},
+      {name:'Bus Station', offset:10, pause:2},
+      {name:'Halte Europaweg', offset:14},
+      {name:'Halte Busdepot (eindpunt)', offset:16, type:'end'}
     ]},
   '18': { number:'18', destination:'Leeuwarden Airport',
     stops: [
-      {name:'Garage Busdepot', offset:0, type:'start'},
-      {name:'Halte Busdepot', offset:2},
-      {name:'Leeuwarden Airport', offset:4},
-      {name:'Bus Station', offset:6, pause:2},
-      {name:'Halte Museumplein', offset:10},
-      {name:'Halte Malherplein', offset:12},
-      {name:'Halte Van Houtenlaan', offset:14},
-      {name:'Halte School', offset:16},
-      {name:'Halte Busdepot', offset:18},
-      {name:'Leeuwarden Airport (eindpunt)', offset:20, type:'end'}
+      {name:'Garage Busdepot', offset:0, type:'garage'},
+      {name:'Centraal Station', offset:2, type:'start'},
+      {name:'Halte Busdepot', offset:4},
+      {name:'Leeuwarden Airport', offset:6},
+      {name:'Bus Station', offset:8, pause:2},
+      {name:'Halte Museumplein', offset:12},
+      {name:'Halte Malherplein', offset:14},
+      {name:'Halte Van Houtenlaan', offset:16},
+      {name:'Halte School', offset:18},
+      {name:'Halte Busdepot', offset:20},
+      {name:'Leeuwarden Airport (eindpunt)', offset:22, type:'end'}
     ]},
   '27': { number:'27', destination:'Halte Busdepot',
     stops: [
-      {name:'Garage Busdepot', offset:0, type:'start'},
-      {name:'Halte Europaweg', offset:2},
-      {name:'Bus Station', offset:7, pause:2},
-      {name:'Medisch Centrum', offset:11},
-      {name:'Halte Malherplein', offset:13},
-      {name:'Halte Museumplein', offset:15},
-      {name:'Halte Veldstraat', offset:17},
-      {name:'Halte School', offset:19},
-      {name:'Halte Busdepot (eindpunt)', offset:21, type:'end'}
+      {name:'Garage Busdepot', offset:0, type:'garage'},
+      {name:'Halte Wijk Station', offset:2, type:'start'},
+      {name:'Halte Europaweg', offset:4},
+      {name:'Bus Station', offset:9, pause:2},
+      {name:'Medisch Centrum', offset:13},
+      {name:'Halte Malherplein', offset:15},
+      {name:'Halte Museumplein', offset:17},
+      {name:'Halte Veldstraat', offset:19},
+      {name:'Halte School', offset:21},
+      {name:'Halte Busdepot (eindpunt)', offset:23, type:'end'}
     ]},
   '5': { number:'5', destination:'Halte Busdepot',
     stops: [
-      {name:'Garage Busdepot', offset:0, type:'start'},
-      {name:'Halte Veldstraat', offset:2},
+      {name:'Garage Busdepot', offset:0, type:'garage'},
+      {name:'Halte Veldstraat', offset:2, type:'start'},
       {name:'Halte Van Houtenlaan', offset:4},
       {name:'Medisch Centrum', offset:6},
       {name:'Tijdelijke Halte Rotonde BD', offset:8},
@@ -571,7 +556,7 @@ function initApp() {
   updateClock();
   setNow();
   render();
-  setInterval(() => { updateClock(); updateCountdown(); render(); }, 1000);
+  setInterval(() => { updateClock(); render(); }, 1000);
 }
 
 function updateClock() {
@@ -585,40 +570,6 @@ function updateClock() {
   const elD2 = document.getElementById('clockDate2');
   if (elD1) elD1.textContent = fmtDate(n);
   if (elD2) elD2.textContent = n.getDate()+' '+['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][n.getMonth()]+' '+n.getFullYear();
-}
-
-function updateCountdown() {
-  const box = document.getElementById('countdownBox');
-  if (!box) return;
-  if (currentStopIndex < 0 || !actualStart) {
-    box.textContent = '0,0';
-    return;
-  }
-  const now = new Date();
-  const ref = getRef();
-  if (!ref || currentStopIndex >= currentStops.length - 1) {
-    box.textContent = '0,0';
-    return;
-  }
-  const nextTime = new Date(ref.getTime() + currentStops[currentStopIndex + 1].offset * 60000);
-  const diffMin = (nextTime - now) / 60000;
-  if (diffMin <= 0) {
-    box.textContent = '0,0';
-  } else {
-    // Format: 2,5 - 2,0 - 1,5 - 1,0 - 0,5
-    const rounded = Math.floor(diffMin * 2) / 2;
-    box.textContent = String(rounded).replace('.',',');
-  }
-}
-
-/* --- Bereken offsets met pauzes --- */
-function calcOffsets(stops) {
-  let acc = 0;
-  return stops.map(s => {
-    const o = { ...s, calcOffset: acc };
-    acc += (s.pause || 0) * 60; // pauze in seconden voor interne calc
-    return o;
-  });
 }
 
 /* --- Sidebar --- */
@@ -720,7 +671,7 @@ window.switchLine = function(key) {
 window.depart = function() {
   if (!plannedArrival) setNow();
   actualStart = new Date();
-  currentStopIndex = 0;
+  currentStopIndex = 1; // Start bij eerste HALTE (index 1), garage is index 0
   totalDelayMin = 0;
   document.getElementById('hStatus').textContent = 'Actief';
   document.getElementById('btnVertrek').disabled = true;
@@ -731,7 +682,6 @@ window.depart = function() {
 window.nextStop = function() {
   if (currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
   
-  // Bereken vertraging bij aankomst huidige halte
   const ref = getRef();
   if (ref && currentStopIndex < currentStops.length - 1) {
     const plannedTime = new Date(ref.getTime() + getCumulativeOffset(currentStopIndex) * 60000);
@@ -749,10 +699,10 @@ window.nextStop = function() {
   render();
 };
 window.prevStop = function() {
-  if (currentStopIndex <= 0) return;
+  if (currentStopIndex <= 1) return; // Niet terug naar garage
   currentStopIndex--;
   document.getElementById('btnVolgende').disabled = false;
-  if (currentStopIndex === 0) document.getElementById('btnTerug').disabled = true;
+  if (currentStopIndex === 1) document.getElementById('btnTerug').disabled = true;
   render();
 };
 
@@ -793,8 +743,10 @@ function render() {
     if (i === currentStopIndex) row.classList.add('active');
 
     let left = '';
-    if (i === currentStopIndex && s.type !== 'start') {
+    if (i === currentStopIndex) {
       left = '<div class="stop-h">H</div>';
+    } else if (s.type === 'garage') {
+      left = '<div class="stop-start-icon"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>';
     } else if (s.type === 'start') {
       left = '<div class="stop-start-icon"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg></div>';
     } else {
@@ -803,9 +755,8 @@ function render() {
 
     const planned = getPlannedTime(i);
     const timeStr = planned ? fmtTime(planned) : '--:--';
-    const ritText = (i === 0) ? 'Rit '+currentLine+'/1042' : '';
-    
-    // Delay berekenen voor deze halte
+    const ritText = (i === 1) ? 'Rit '+currentLine+'/1042' : '';
+
     let delayHtml = '';
     if (i > currentStopIndex && totalDelayMin > 0.05) {
       const delayStr = '+' + totalDelayMin.toFixed(1).replace('.',',');
@@ -815,7 +766,7 @@ function render() {
       delayHtml = '<div class="stop-delay">' + delayStr + '</div>';
     }
 
-    const actions = (i === currentStopIndex)
+    const actions = (i === currentStopIndex && s.type !== 'garage')
       ? '<div class="stop-actions"><button class="act-btn" onclick="showInfo(\''+s.name+'\')" title="Info"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button><button class="act-btn" onclick="showBlock(\''+s.name+'\')" title="Blokkeren"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg></button></div>'
       : '<div class="stop-actions" style="visibility:hidden;"><button class="act-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></button><button class="act-btn"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg></button></div>';
 
@@ -850,7 +801,7 @@ function render() {
   /* Delay pill */
   const hDelay = document.getElementById('hDelay');
   const now = new Date();
-  if (!ref || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) {
+  if (!ref || currentStopIndex < 1 || currentStopIndex >= currentStops.length-1) {
     hDelay.textContent = '+0,0';
   } else {
     const nextTime = getPlannedTime(currentStopIndex + 1);
