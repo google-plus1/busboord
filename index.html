@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Arriva Boordcomputer – Roblox Ready</title>
+    <title>Arriva Boordcomputer – werkend</title>
     <style>
         :root {
             --bg-cream: #E8E8D8;
@@ -20,13 +20,12 @@
             --sidebar-btn-active: #8FB87A;
             --sidebar-btn-hover: #B0B0A0;
             --border-color: #B8B8A8;
-            --shadow-soft: 0 4px 20px rgba(0,0,0,0.15);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             display: flex; justify-content: center; align-items: center;
             height: 100vh; width: 100vw; overflow: hidden; background: #1a1a1a;
-            font-family: 'Segoe UI', 'Roboto', 'Inter', 'Open Sans', sans-serif;
+            font-family: 'Segoe UI', 'Roboto', 'Inter', sans-serif;
         }
         .tablet-frame {
             width: 100vw; height: 100vh; max-width: 1200px; max-height: 800px;
@@ -39,43 +38,36 @@
         .top-bar {
             background: var(--bg-light); border-bottom: 2px solid var(--border-color);
             padding: 6px 16px; display: flex; align-items: center;
-            justify-content: space-between; height: 40px; flex-shrink: 0;
+            justify-content: space-between; height: 40px;
         }
-        .top-bar-left { display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .top-bar-left { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
         .top-bar-left span { color: var(--text-dark); font-weight: 600; }
-        .top-bar-right { display: flex; align-items: center; gap: 10px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .status-dot.green { background: #4CAF50; box-shadow: 0 0 6px rgba(76,175,80,0.5); }
-
         .main-layout { display: flex; flex: 1; overflow: hidden; }
         .center-area { flex: 1; display: flex; flex-direction: column; padding: 12px 16px; gap: 10px; overflow: hidden; }
         .right-sidebar {
             width: 150px; background: var(--sidebar-bg);
             border-left: 2px solid var(--border-color);
-            display: flex; flex-direction: column;
-            padding: 8px 6px; gap: 6px; flex-shrink: 0; overflow-y: auto;
+            display: flex; flex-direction: column; padding: 8px 6px; gap: 6px;
         }
         .sidebar-btn {
             width: 100%; padding: 10px 6px; border-radius: 6px;
             border: 1px solid var(--border-color);
             background: var(--sidebar-btn); color: var(--text-dark);
-            font-size: 11px; font-weight: 600; cursor: pointer;
-            transition: all 0.15s; text-align: center;
+            font-size: 11px; font-weight: 600; cursor: pointer; text-align: center;
         }
-        .sidebar-btn:hover { background: var(--sidebar-btn-hover); transform: translateY(-1px); }
+        .sidebar-btn:hover { background: var(--sidebar-btn-hover); }
         .sidebar-btn.active { background: var(--sidebar-btn-active); color: white; border-color: var(--green-dark); }
 
         .header-info { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
         .header-left { flex: 1; }
-        .line-number { font-size: 26px; font-weight: 900; color: var(--text-dark); line-height: 1.1; }
-        .line-status { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-        .destination { font-size: 17px; font-weight: 600; color: var(--text-dark); margin-top: 3px; }
+        .line-number { font-size: 26px; font-weight: 900; color: var(--text-dark); }
+        .line-status { font-size: 13px; color: var(--text-muted); }
+        .destination { font-size: 17px; font-weight: 600; color: var(--text-dark); }
         .delay-box {
             width: 85px; height: 65px; background: var(--green-dark);
             border-radius: 8px; display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px; font-weight: 900; flex-shrink: 0;
-            box-shadow: var(--shadow-soft); transition: all 0.3s;
-            font-family: 'Courier New', monospace;
+            color: white; font-size: 20px; font-weight: 900; font-family: 'Courier New', monospace;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         .delay-box.red { background: var(--red-alert); }
         .delay-box.yellow { background: var(--orange-warn); }
@@ -84,73 +76,48 @@
             flex: 1; overflow-y: auto; border-radius: 8px;
             border: 1px solid var(--border-color);
             background: var(--green-pale); padding: 8px;
-            display: flex; flex-direction: column; gap: 3px;
         }
         .stop-item {
             display: flex; align-items: center; padding: 7px 12px;
-            border-radius: 6px; font-size: 13px; font-weight: 500;
-            transition: all 0.15s; border-left: 4px solid transparent;
+            border-radius: 6px; font-size: 13px; border-left: 4px solid transparent;
             color: var(--text-dark);
         }
-        .stop-item:hover { background: rgba(255,255,255,0.4); }
         .stop-item.current { background: rgba(255,255,255,0.75); border-left-color: var(--orange-warn); font-weight: 700; }
         .stop-item.past { opacity: 0.45; text-decoration: line-through; }
-        .stop-item.start { border-left-color: var(--green-dark); background: rgba(74,122,58,0.12); }
-        .stop-item.end { border-left-color: var(--red-alert); background: rgba(211,47,47,0.08); }
         .stop-name { flex: 1; }
-        .stop-time { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-muted); margin-right: 8px; }
+        .stop-time { font-weight: 600; color: var(--text-muted); margin-right: 8px; }
 
         .bottom-bar {
             background: var(--bg-light); border-top: 2px solid var(--border-color);
             padding: 8px 16px; display: flex; align-items: center;
-            justify-content: space-between; height: 52px; flex-shrink: 0;
+            justify-content: space-between; height: 52px;
         }
         .bottom-left { display: flex; gap: 8px; }
         .bottom-btn {
             padding: 8px 18px; border-radius: 6px; border: none;
-            font-size: 13px; font-weight: 700; cursor: pointer;
-            transition: all 0.15s; color: white;
+            font-size: 13px; font-weight: 700; cursor: pointer; color: white;
         }
-        .bottom-btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
-        .bottom-btn:active { transform: scale(0.96); }
         .bottom-btn.green { background: var(--green-dark); }
         .bottom-btn.blue { background: #1976D2; }
         .bottom-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .bottom-right { display: flex; align-items: center; gap: 14px; }
         .arrival-badge {
             background: var(--green-dark); color: white;
-            padding: 4px 12px; border-radius: 12px;
-            font-size: 12px; font-weight: 700;
+            padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700;
         }
-        .clock-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-dark); }
-        .clock-date { font-size: 11px; color: var(--text-muted); text-align: right; }
+        .clock-time { font-size: 20px; font-weight: 700; }
+        .clock-date { font-size: 11px; color: var(--text-muted); }
 
-        .subpage { background: #f0f4f8; color: #333; }
-        .subpage-header { background: var(--bg-light); border-bottom: 2px solid var(--border-color); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-        .subpage-header h2 { font-size: 18px; font-weight: 600; color: var(--text-dark); }
-        .subpage-content { flex: 1; overflow-y: auto; padding: 16px; }
-        .card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 12px; border: 1px solid var(--border-color); }
-        .action-btn { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 8px; color: white; }
-        .action-btn.blue { background: #3498DB; }
-        .action-btn.green { background: var(--green-dark); }
-        .action-btn.red { background: var(--red-alert); }
-        .action-btn.orange { background: #E67E22; }
-        .function-btn { width: 100%; padding: 12px; margin: 4px 0; border-radius: 8px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; color: white; }
-        .ticket-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .ticket-card { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); color: white; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; border: none; }
-        .ticket-card:hover { transform: translateY(-2px); }
-        .ticket-card.orange { background: linear-gradient(135deg, #E67E22, #D35400); }
-        .ticket-card.purple { background: linear-gradient(135deg, #9B59B6, #8E44AD); }
-        .cart-item { display: flex; justify-content: space-between; padding: 8px 12px; background: var(--bg-light); border-radius: 6px; margin-bottom: 4px; }
-        .cart-total { display: flex; justify-content: space-between; padding: 10px; background: var(--green-dark); color: white; border-radius: 6px; font-weight: 700; margin-top: 8px; }
-        .pay-btn { width: 100%; padding: 12px; background: var(--green-dark); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-        .clear-btn { width: 100%; padding: 10px; background: var(--red-alert); color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 6px; }
-        .toggle-switch { width: 44px; height: 24px; background: #ccc; border-radius: 12px; position: relative; cursor: pointer; }
-        .toggle-switch.active { background: var(--green-dark); }
-        .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.3s; }
-        .toggle-switch.active::after { transform: translateX(20px); }
-        textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); font-family: inherit; resize: vertical; }
-        .back-btn { width: 32px; height: 32px; border-radius: 6px; border: none; background: var(--sidebar-btn); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .time-selector { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+        .time-selector label { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+        .time-selector input[type="time"] {
+            padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color);
+            font-size: 14px; background: white; color: var(--text-dark);
+        }
+        .time-selector button {
+            padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color);
+            background: var(--sidebar-btn); font-weight: 600; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -158,22 +125,24 @@
     <div class="page active" id="pageHome">
         <div class="top-bar">
             <div class="top-bar-left">
-                <span id="topDate"></span><span style="color:var(--text-muted)">|</span>
-                <span>Lijn <span id="topLineNum">54</span></span><span style="color:var(--text-muted)">|</span>
-                <span>Bestuurder: <span id="topDriver">J. de Vries</span></span><span style="color:var(--text-muted)">|</span>
-                <span>Omloop: <span id="topOmloop">A</span></span>
-            </div>
-            <div class="top-bar-right">
-                <span class="status-dot green"></span>
+                <span id="topDate"></span><span>|</span>
+                <span>Lijn <span id="topLineNum">54</span></span><span>|</span>
+                <span>Bestuurder: J. de Vries</span><span>|</span>
+                <span>Omloop: A</span>
             </div>
         </div>
         <div class="main-layout">
             <div class="center-area">
                 <div class="header-info">
                     <div class="header-left">
-                        <div class="line-number" id="lineNumber">54 Geen Dienst</div>
+                        <div class="line-number" id="lineNumber">X Geen Dienst</div>
                         <div class="line-status" id="lineStatus">In dienst</div>
                         <div class="destination" id="destination">Halte Busdepot</div>
+                        <div class="time-selector">
+                            <label for="startTimeInput">Geplande vertrek:</label>
+                            <input type="time" id="startTimeInput" onchange="setPlannedTime()">
+                            <button onclick="setNow()">Nu</button>
+                        </div>
                     </div>
                     <div class="delay-box green" id="delayBox">0</div>
                 </div>
@@ -184,16 +153,13 @@
                 <button class="sidebar-btn" onclick="switchLine('18')">🚌 Lijn 18</button>
                 <button class="sidebar-btn" onclick="switchLine('27')">🚌 Lijn 27</button>
                 <button class="sidebar-btn" onclick="switchLine('42')">🚌 Lijn 42</button>
-                <button class="sidebar-btn" onclick="goToPage('verkoop')">🎫 Kaartverkoop</button>
-                <button class="sidebar-btn" onclick="goToPage('omroep')">📢 Oproepen</button>
-                <button class="sidebar-btn" onclick="goToPage('instellingen')">⚙️ Menu</button>
             </div>
         </div>
         <div class="bottom-bar">
             <div class="bottom-left">
-                <button class="bottom-btn green" id="btnVertrek" onclick="sendCommand('depart')">🚌 Vertrek</button>
-                <button class="bottom-btn blue" id="btnVolgende" onclick="sendCommand('next')" disabled>⏭ Volgende</button>
-                <button class="bottom-btn blue" id="btnTerug" onclick="sendCommand('prev')" disabled>⏮ Terug</button>
+                <button class="bottom-btn green" id="btnVertrek" onclick="depart()">🚌 Vertrek</button>
+                <button class="bottom-btn blue" id="btnVolgende" onclick="nextStop()" disabled>⏭ Volgende</button>
+                <button class="bottom-btn blue" id="btnTerug" onclick="prevStop()" disabled>⏮ Terug</button>
             </div>
             <div class="bottom-right">
                 <div class="arrival-badge" id="arrivalBadge">Vertrek: --:--</div>
@@ -204,260 +170,202 @@
             </div>
         </div>
     </div>
-
-    <!-- VERKOOP PAGE -->
-    <div class="page subpage" id="pageVerkoop">
-        <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>🎫 Kaartjes Verkopen</h2></div>
-        <div class="subpage-content">
-            <div class="card"><h3>🚌 Buskaartjes</h3><div class="ticket-grid">
-                <button class="ticket-card" onclick="addToCart('Enkele reis',3.50)"><span>Enkele reis</span><span>€3,50</span></button>
-                <button class="ticket-card orange" onclick="addToCart('Retour',6.00)"><span>Retour</span><span>€6,00</span></button>
-                <button class="ticket-card" onclick="addToCart('Dagkaart',9.50)"><span>Dagkaart</span><span>€9,50</span></button>
-                <button class="ticket-card purple" onclick="addToCart('Groepskaart 5p',15.00)"><span>Groepskaart 5p</span><span>€15,00</span></button>
-            </div></div>
-            <div class="card"><h3>🛒 Winkelwagen</h3>
-                <div id="cartItems"><div style="text-align:center;color:#888;padding:16px;">Nog geen kaartjes geselecteerd</div></div>
-                <div class="cart-total" id="cartTotal" style="display:none;"><span>Totaal</span><span id="totalPrice">€0,00</span></div>
-                <button class="pay-btn" id="payBtn" onclick="payCart()" style="display:none;">💳 Afrekenen</button>
-                <button class="clear-btn" id="clearBtn" onclick="clearCart()" style="display:none;">🗑️ Leegmaken</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- OMROEP PAGE -->
-    <div class="page subpage" id="pageOmroep">
-        <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>📢 Omroep</h2></div>
-        <div class="subpage-content">
-            <div class="card"><h3>Standaard Berichten</h3>
-                <button class="function-btn action-btn blue" onclick="speak('De volgende halte is in aantocht.')">🚏 Volgende halte</button>
-                <button class="function-btn action-btn blue" onclick="speak('Wij naderen de eindbestemming.')">🏁 Eindbestemming</button>
-                <button class="function-btn action-btn blue" onclick="speak('De deuren gaan sluiten. Houd afstand.')">🔒 Deuren sluiten</button>
-            </div>
-            <div class="card"><h3>Eigen Omroep</h3><textarea id="customAnnouncement" rows="3" placeholder="Typ uw bericht..."></textarea>
-                <button class="function-btn action-btn orange" onclick="playCustom()">📢 Verzenden</button></div>
-        </div>
-    </div>
-
-    <!-- INSTELLINGEN PAGE -->
-    <div class="page subpage" id="pageInstellingen">
-        <div class="subpage-header"><button class="back-btn" onclick="goToPage('home')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15,4 7,12 15,20"/></svg></button><h2>⚙️ Instellingen</h2></div>
-        <div class="subpage-content">
-            <div class="card"><h3>🔊 Audio</h3>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;"><span>Spraakomroepen</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;"><span>Meldinggeluiden</span><div class="toggle-switch active" onclick="this.classList.toggle('active')"></div></div>
-            </div>
-            <div class="card"><h3>⚡ Acties</h3>
-                <button class="action-btn blue" onclick="alert('Data gesynchroniseerd!')">🔄 Synchroniseren</button>
-                <button class="action-btn red" onclick="if(confirm('Weet je het zeker?')) location.reload()">🗑️ App Resetten</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-// ⚠️ VERVANG DEZE URL DOOR JOUW NGROK-URL + "/api" ⚠️
-const SERVER = "https://mournful-overvalue-briskness.ngrok-free.dev/api";
+    const busLines = {
+        '54': { number:'54', destination:'Halte Busdepot',
+            stops: [
+                {name:'Medisch Centrum', offset:0, type:'start'},
+                {name:'Tijdelijke Halte Rotonde BD', offset:2},{name:'Halte Museumplein', offset:4},{name:'Halte Malherplein', offset:6},
+                {name:'Bus Station', offset:8},{name:'Halte Europaweg', offset:10},{name:'Halte Busdepot (eindpunt)', offset:12, type:'end'}
+            ]},
+        '18': { number:'18', destination:'Leeuwarden Airport',
+            stops: [
+                {name:'Centraal Station', offset:0, type:'start'},
+                {name:'Halte Busdepot', offset:2},{name:'Leeuwarden Airport', offset:4},{name:'Bus Station', offset:6},
+                {name:'Halte Museumplein', offset:8},{name:'Halte Malherplein', offset:10},{name:'Halte Van Houtenlaan', offset:12},
+                {name:'Halte School', offset:14},{name:'Halte Busdepot', offset:16},{name:'Leeuwarden Airport (eindpunt)', offset:18, type:'end'}
+            ]},
+        '27': { number:'27', destination:'Halte Busdepot',
+            stops: [
+                {name:'Halte Wijk Station', offset:0, type:'start'},
+                {name:'Halte Europaweg', offset:2},{name:'Bus Station', offset:7},{name:'Medisch Centrum', offset:9},
+                {name:'Halte Malherplein', offset:11},{name:'Halte Museumplein', offset:13},{name:'Halte Veldstraat', offset:15},
+                {name:'Halte School', offset:17},{name:'Halte Busdepot (eindpunt)', offset:19, type:'end'}
+            ]},
+        '5': { number:'5', destination:'Halte Busdepot',
+            stops: [
+                {name:'Halte Veldstraat', offset:0, type:'start'},
+                {name:'Halte Van Houtenlaan', offset:2},{name:'Medisch Centrum', offset:4},{name:'Tijdelijke Halte Rotonde BD', offset:6},
+                {name:'Bus Station', offset:8},{name:'Centraal Station', offset:10},{name:'Halte Europaweg', offset:12},
+                {name:'Tijdelijke Halte Rotonde BD', offset:14},{name:'Medisch Centrum', offset:16},{name:'Halte Van Houtenlaan', offset:18},
+                {name:'Halte School', offset:20},{name:'Halte Busdepot', offset:22},{name:'Halte Busdepot (eindpunt)', offset:24, type:'end'}
+            ]}
+    };
 
-const busLines = {
-    '54': { number:'54', destination:'Halte Busdepot',
-        stops: [
-            {name:'Medisch Centrum', offset:0, type:'start'},
-            {name:'Tijdelijke Halte Rotonde BD', offset:2},{name:'Halte Museumplein', offset:4},{name:'Halte Malherplein', offset:6},
-            {name:'Bus Station', offset:8},{name:'Halte Europaweg', offset:10},{name:'Halte Busdepot (eindpunt)', offset:12, type:'end'}
-        ]},
-    '18': { number:'18', destination:'Leeuwarden Airport',
-        stops: [
-            {name:'Centraal Station', offset:0, type:'start'},
-            {name:'Halte Busdepot', offset:2},{name:'Leeuwarden Airport', offset:4},{name:'Bus Station', offset:6},
-            {name:'Halte Museumplein', offset:8},{name:'Halte Malherplein', offset:10},{name:'Halte Van Houtenlaan', offset:12},
-            {name:'Halte School', offset:14},{name:'Halte Busdepot', offset:16},{name:'Leeuwarden Airport (eindpunt)', offset:18, type:'end'}
-        ]},
-    '27': { number:'27', destination:'Halte Busdepot',
-        stops: [
-            {name:'Halte Wijk Station', offset:0, type:'start'},
-            {name:'Halte Europaweg', offset:2},{name:'Bus Station', offset:4},{name:'Medisch Centrum', offset:6},
-            {name:'Halte Malherplein', offset:8},{name:'Halte Museumplein', offset:10},{name:'Halte Veldstraat', offset:12},
-            {name:'Halte School', offset:14},{name:'Halte Busdepot (eindpunt)', offset:16, type:'end'}
-        ]},
-    '42': { number:'42', destination:'Halte Busdepot',
-        stops: [
-            {name:'Halte Veldstraat', offset:0, type:'start'},
-            {name:'Halte Van Houtenlaan', offset:2},{name:'Medisch Centrum', offset:4},{name:'Tijdelijke Halte Rotonde BD', offset:6},
-            {name:'Bus Station', offset:8},{name:'Centraal Station', offset:10},{name:'Halte Europaweg', offset:12},
-            {name:'Tijdelijke Halte Rotonde BD', offset:14},{name:'Medisch Centrum', offset:16},{name:'Halte Van Houtenlaan', offset:18},
-            {name:'Halte School', offset:20},{name:'Halte Busdepot', offset:22},{name:'Halte Busdepot (eindpunt)', offset:24, type:'end'}
-        ]}
-};
+    let currentLine = '54';
+    let currentStops = busLines['54'].stops;
+    let plannedStart = null;    // Date object
+    let actualStart = null;     // Date object
+    let currentStopIndex = -1;
 
-let currentLine = '54';
-let currentStops = busLines['54'].stops;
-let plannedStart = null, actualStart = null, currentStopIndex = -1;
-let cart = [];
+    function formatTime(d) { return d ? `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '--:--'; }
 
-const $ = id => document.getElementById(id);
+    // ---- Klok ----
+    function updateClock() {
+        const n = new Date();
+        document.getElementById('clockTime').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+        const m = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+        document.getElementById('clockDate').textContent = `${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;
+        document.getElementById('topDate').textContent = document.getElementById('clockDate').textContent;
+    }
 
-function formatTime(d) { return d ? `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : '--:--'; }
+    // ---- Geplande tijd ----
+    window.setPlannedTime = function() {
+        const v = document.getElementById('startTimeInput').value;
+        if (!v) return;
+        const [h,m] = v.split(':');
+        const now = new Date();
+        plannedStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
+        if (!actualStart) renderStops();
+        updateArrivalBadge();
+    };
+    window.setNow = function() {
+        const n = new Date();
+        document.getElementById('startTimeInput').value = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+        setPlannedTime();
+    };
 
-async function fetchState() {
-    try {
-        const res = await fetch(SERVER + '/state');
-        const s = await res.json();
-        if (!s || !s.line) return;
-        if (s.line !== currentLine) {
-            currentLine = s.line;
-            currentStops = busLines[s.line]?.stops || currentStops;
-            updateLineDisplay();
-        }
-        currentStopIndex = s.stopIndex;
-        plannedStart = s.plannedStart ? new Date(s.plannedStart) : null;
-        actualStart = s.actualStart ? new Date(s.actualStart) : null;
-        if (s.stops && s.stops.length) currentStops = s.stops;
+    // ---- Lijn wisselen ----
+    window.switchLine = function(lineKey) {
+        if (!busLines[lineKey]) return;
+        currentLine = lineKey;
+        currentStops = busLines[lineKey].stops;
+        currentStopIndex = -1;
+        actualStart = null;
+        plannedStart = null;
+        document.getElementById('lineNumber').textContent = busLines[lineKey].number + ' Geen Dienst';
+        document.getElementById('destination').textContent = busLines[lineKey].destination;
+        document.getElementById('topLineNum').textContent = busLines[lineKey].number;
+        document.getElementById('lineStatus').textContent = 'In dienst';
+        document.getElementById('btnVertrek').disabled = false;
+        document.getElementById('btnVolgende').disabled = true;
+        document.getElementById('btnTerug').disabled = true;
+        setNow();
         updateAll();
-    } catch(e) {}
-}
+        document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+        const btns = document.querySelectorAll(`.sidebar-btn[onclick*="switchLine('${lineKey}')"]`);
+        if (btns.length) btns[0].classList.add('active');
+    };
 
-function updateAll() {
-    updateDelayBox();
-    updateArrivalBadge();
-    renderStops();
-    updateButtons();
-}
+    // ---- Reis besturing ----
+    window.depart = function() {
+        if (!plannedStart) setNow();
+        actualStart = new Date();
+        currentStopIndex = 0;
+        document.getElementById('lineStatus').textContent = 'In dienst - Actief';
+        document.getElementById('btnVertrek').disabled = true;
+        document.getElementById('btnVolgende').disabled = false;
+        document.getElementById('btnTerug').disabled = true;
+        updateAll();
+    };
+    window.nextStop = function() {
+        if (currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
+        currentStopIndex++;
+        if (currentStopIndex === currentStops.length-1) {
+            document.getElementById('btnVolgende').disabled = true;
+            document.getElementById('lineStatus').textContent = 'Eindbestemming bereikt';
+        }
+        document.getElementById('btnTerug').disabled = false;
+        updateAll();
+    };
+    window.prevStop = function() {
+        if (currentStopIndex <= 0) return;
+        currentStopIndex--;
+        document.getElementById('btnVolgende').disabled = false;
+        if (currentStopIndex === 0) document.getElementById('btnTerug').disabled = true;
+        updateAll();
+    };
 
-function updateLineDisplay() {
-    $('lineNumber').textContent = busLines[currentLine].number + ' Geen Dienst';
-    $('destination').textContent = busLines[currentLine].destination;
-    $('topLineNum').textContent = busLines[currentLine].number;
-    document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-    const btns = document.querySelectorAll(`.sidebar-btn[onclick*="switchLine('${currentLine}')"]`);
-    if (btns.length) btns[0].classList.add('active');
-}
-
-function updateDelayBox() {
-    const box = $('delayBox');
-    if (!actualStart || currentStopIndex < 0 || currentStopIndex >= currentStops.length - 1) {
-        box.textContent = '0'; box.className = 'delay-box green';
-        return;
+    function updateAll() {
+        updateDelayBox();
+        updateArrivalBadge();
+        renderStops();
     }
-    const now = new Date();
-    const nextTime = new Date(actualStart.getTime() + currentStops[currentStopIndex + 1].offset * 60000);
-    const diffSec = Math.round((now - nextTime) / 1000);
 
-    function fmt(sec) {
-        if (sec <= -60) {
-            let abs = Math.abs(sec), mins = Math.floor(abs / 60), half = (abs % 60) >= 30 ? 0.5 : 0;
-            let val = mins + half;
-            return { text: '-' + (val % 1 === 0 ? val : Math.floor(val) + '½'), color: 'red' };
-        } else if (sec <= -30) {
-            return { text: '-½', color: 'yellow' };
-        } else if (sec < 60) {
-            return { text: '0', color: 'green' };
+    function updateDelayBox() {
+        const box = document.getElementById('delayBox');
+        const ref = actualStart || plannedStart;
+        if (!ref || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) {
+            box.textContent = '0';
+            box.className = 'delay-box green';
+            return;
+        }
+        const now = new Date();
+        const nextTime = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
+        const diffSec = Math.round((now - nextTime)/1000);
+        function fmt(sec) {
+            if (sec <= -60) {
+                let abs = Math.abs(sec), mins = Math.floor(abs/60), half = (abs%60)>=30?0.5:0;
+                let val = mins+half;
+                return {text:'-'+(val%1===0?val:Math.floor(val)+'½'), color:'red'};
+            } else if (sec <= -30) return {text:'-½', color:'yellow'};
+            else if (sec < 60) return {text:'0', color:'green'};
+            else {
+                let mins = Math.floor(sec/60), half = (sec%60)>=30?0.5:0;
+                let val = mins+half;
+                return {text:'+'+(val%1===0?val:Math.floor(val)+'½'), color:'red'};
+            }
+        }
+        const {text,color} = fmt(diffSec);
+        box.textContent = text;
+        box.className = `delay-box ${color}`;
+    }
+
+    function updateArrivalBadge() {
+        const badge = document.getElementById('arrivalBadge');
+        const ref = actualStart || plannedStart;
+        if (!ref) { badge.textContent = 'Vertrek: --:--'; return; }
+        if (currentStopIndex === -1 && plannedStart && !actualStart) {
+            badge.textContent = `Vertrek: ${formatTime(plannedStart)}`;
+        } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length-1) {
+            const next = new Date(ref.getTime() + currentStops[currentStopIndex+1].offset*60000);
+            badge.textContent = `Aankomst: ${formatTime(next)}`;
+        } else if (currentStopIndex >= currentStops.length-1) {
+            badge.textContent = 'Eindbestemming';
         } else {
-            let mins = Math.floor(sec / 60), half = (sec % 60) >= 30 ? 0.5 : 0;
-            let val = mins + half;
-            return { text: '+' + (val % 1 === 0 ? val : Math.floor(val) + '½'), color: 'red' };
+            badge.textContent = 'Vertrek: --:--';
         }
     }
 
-    const { text, color } = fmt(diffSec);
-    box.textContent = text;
-    box.className = `delay-box ${color}`;
-}
-
-function updateArrivalBadge() {
-    const badge = $('arrivalBadge');
-    if (currentStopIndex === -1 && plannedStart && !actualStart) badge.textContent = `Vertrek: ${formatTime(plannedStart)}`;
-    else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length - 1 && actualStart) {
-        const next = new Date(actualStart.getTime() + currentStops[currentStopIndex + 1].offset * 60000);
-        badge.textContent = `Aankomst: ${formatTime(next)}`;
-    } else if (currentStopIndex >= currentStops.length - 1) badge.textContent = 'Eindbestemming';
-    else badge.textContent = 'Vertrek: --:--';
-}
-
-function renderStops() {
-    const list = $('stopList'); list.innerHTML = '';
-    const ref = actualStart || plannedStart || null;
-    currentStops.forEach((s, i) => {
-        const div = document.createElement('div'); div.className = 'stop-item';
-        if (i === currentStopIndex) div.classList.add('current');
-        if (i < currentStopIndex) div.classList.add('past');
-        if (s.type === 'start') div.classList.add('start');
-        if (s.type === 'end') div.classList.add('end');
-        const t = ref ? new Date(ref.getTime() + s.offset * 60000) : null;
-        div.innerHTML = `<span class="stop-name">${s.name}</span><span class="stop-time">${t ? formatTime(t) : '--:--'}</span>`;
-        list.appendChild(div);
-    });
-    if (currentStopIndex >= 0) {
-        const items = list.querySelectorAll('.stop-item');
-        if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    function renderStops() {
+        const list = document.getElementById('stopList');
+        list.innerHTML = '';
+        const ref = actualStart || plannedStart || null;
+        currentStops.forEach((s,i) => {
+            const d = document.createElement('div');
+            d.className = 'stop-item';
+            if (i === currentStopIndex) d.classList.add('current');
+            if (i < currentStopIndex) d.classList.add('past');
+            if (s.type === 'start') d.classList.add('start');
+            if (s.type === 'end') d.classList.add('end');
+            const t = ref ? new Date(ref.getTime() + s.offset*60000) : null;
+            d.innerHTML = `<span class="stop-name">${s.name}</span><span class="stop-time">${t ? formatTime(t) : '--:--'}</span>`;
+            list.appendChild(d);
+        });
+        if (currentStopIndex >= 0) {
+            const items = list.querySelectorAll('.stop-item');
+            if (items[currentStopIndex]) items[currentStopIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
-}
 
-function updateButtons() {
-    $('btnVertrek').disabled = !!actualStart;
-    $('btnVolgende').disabled = !actualStart || currentStopIndex >= currentStops.length - 1;
-    $('btnTerug').disabled = !actualStart || currentStopIndex <= 0;
-}
-
-async function sendCommand(cmd) {
-    try {
-        await fetch(SERVER + '/command', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ command: cmd })
-        });
-    } catch(e) { alert('Server niet bereikbaar'); }
-}
-
-window.switchLine = async function(lineKey) {
-    if (!busLines[lineKey]) return;
-    currentLine = lineKey;
-    currentStops = busLines[lineKey].stops;
-    currentStopIndex = -1;
-    plannedStart = null;
-    actualStart = null;
-    updateLineDisplay();
-    updateAll();
-    try {
-        await fetch(SERVER + '/state', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ line: lineKey, stopIndex: -1, plannedStart: null, actualStart: null, stops: busLines[lineKey].stops })
-        });
-    } catch(e) {}
-};
-
-window.addToCart = (n,p) => { cart.push({name:n,price:p}); renderCart(); };
-window.clearCart = () => { cart=[]; renderCart(); };
-window.payCart = () => { if(!cart.length) return; alert('Betaling geslaagd!'); cart=[]; renderCart(); };
-function renderCart() {
-    const ci=$('cartItems'), ct=$('cartTotal'), tp=$('totalPrice'), pb=$('payBtn'), cb=$('clearBtn');
-    if(!cart.length) { ci.innerHTML='<div style="text-align:center;color:#888;padding:16px;">Nog geen kaartjes geselecteerd</div>'; ct.style.display='none'; pb.style.display='none'; cb.style.display='none'; return; }
-    let h='',t=0; cart.forEach(i=>{t+=i.price; h+=`<div class="cart-item"><span>${i.name}</span><span>€${i.price.toFixed(2).replace('.',',')}</span></div>`;});
-    ci.innerHTML=h; tp.textContent='€'+t.toFixed(2).replace('.',','); ct.style.display='flex'; pb.style.display='block'; cb.style.display='block';
-}
-
-window.speak = t => { if(window.speechSynthesis){ window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang='nl-NL'; u.rate=1.0; window.speechSynthesis.speak(u); } };
-window.playCustom = () => { const t=$('customAnnouncement').value; if(t.trim()) speak(t); };
-
-window.goToPage = p => {
-    document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
-    $('pageHome').classList.toggle('active', p==='home');
-    $('pageVerkoop').classList.toggle('active', p==='verkoop');
-    $('pageOmroep').classList.toggle('active', p==='omroep');
-    $('pageInstellingen').classList.toggle('active', p==='instellingen');
-};
-
-function updateClock() {
-    const n = new Date();
-    $('clockTime').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
-    const m = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-    $('clockDate').textContent = `${n.getDate()} ${m[n.getMonth()]} ${n.getFullYear()}`;
-    $('topDate').textContent = $('clockDate').textContent;
-}
-
-setInterval(() => { updateClock(); fetchState(); }, 1000);
-updateClock();
-fetchState();
+    // Start
+    setInterval(() => { updateClock(); updateDelayBox(); updateArrivalBadge(); }, 1000);
+    updateClock();
+    setNow();
+    renderStops();
+    document.querySelector('.sidebar-btn[onclick*="switchLine(\'54\')"]').classList.add('active');
 </script>
 </body>
 </html>
