@@ -7,8 +7,7 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background:#000;
-    display:flex; justify-content:center; align-items:center;
+    background:#000; display:flex; justify-content:center; align-items:center;
     height:100vh; width:100vw; overflow:hidden;
     font-family:'Segoe UI','Source Sans Pro',sans-serif;
   }
@@ -222,11 +221,12 @@
 
     <div class="content" id="mainContent">
       <div class="time-bar">
-        <label>Geplande aankomst eindpunt:</label>
-        <input type="time" id="arrivalInput" onchange="setArrival()">
+        <label id="timeLabel">Geplande vertrek:</label>
+        <input type="time" id="arrivalInput" onchange="setTime()">
         <button onclick="setNow()">Nu</button>
         <button class="toggle-btn" id="flexToggle" onclick="toggleFlex()">Vaste dienst</button>
         <button class="toggle-btn" id="autoToggle" onclick="toggleAuto()">Auto: Uit</button>
+        <button class="toggle-btn" id="modeToggle" onclick="toggleMode()">Vertrek</button>
       </div>
       <div class="stop-list" id="stopList"></div>
       <div class="next-line-bar" id="nextLineBar" style="display:none;">
@@ -344,14 +344,13 @@ const busLines = {
 };
 
 let currentLine = '54';
-let currentStops = busLines['54'].stops;
-let plannedArrival = null;
+let currentStops = busLines['54'].stops.map(s => ({...s}));
+let plannedArrival = null;   // still used internally if mode is 'arrival'
 let actualStart = null;
-let currentStopIndex = -1;
+let currentStopIndex = -1;   // -1: not started, 0: garage, 1: first stop, etc.
 let flexMode = false;
 let autoMode = false;
-let nextLineKey = null;
-let breakMinutes = 5;
+let timeMode = 'departure';  // 'departure' or 'arrival'
 let isPlaying = false;
 
 const LOGIN_CODE = '2310';
@@ -404,6 +403,7 @@ function updateClock() {
 
 function startIndex() { return 1; }
 function activeStopCount() { return currentStops.length - 1; }
+
 function stopOffset(idx) {
   if (idx < startIndex()) return 0;
   let offset = 0;
@@ -414,38 +414,78 @@ function stopOffset(idx) {
 }
 
 function getStartTime() {
+  if (timeMode === 'departure') {
+    // planned time is the departure time from the first active stop, which we store as plannedDeparture
+    return plannedDeparture ? plannedDeparture : null;
+  }
+  // arrival mode: back-calculate from plannedArrival
   if (!plannedArrival) return null;
   const totalActive = activeStopCount();
   if (totalActive <= 0) return null;
-  const totalMin = stopOffset(currentStops.length - 1); // from first active to last
+  const totalMin = stopOffset(currentStops.length - 1);
   return new Date(plannedArrival.getTime() - totalMin * 60000);
 }
-function getRef() { return actualStart || getStartTime(); }
-function getPlannedTime(stopIdx) {
-  const ref = getRef();
-  if (!ref) return null;
-  if (stopIdx < startIndex()) return null;
-  return new Date(ref.getTime() + stopOffset(stopIdx) * 60000);
-}
 
-window.setArrival = function() {
+let plannedDeparture = null; // holds the planned departure time for the first active stop
+
+function setPlannedTimeFromInput() {
   const v = document.getElementById('arrivalInput')?.value;
   if (!v) return;
   const [h,m] = v.split(':');
   const now = new Date();
-  plannedArrival = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
+  const time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m), 0);
+  if (timeMode === 'departure') {
+    plannedDeparture = time;
+    plannedArrival = null; // not used
+  } else {
+    plannedArrival = time;
+    plannedDeparture = null;
+  }
   render();
-};
+}
+
+window.setTime = setPlannedTimeFromInput;
+
 window.setNow = function() {
   const n = new Date();
-  const totalActive = activeStopCount();
-  if (totalActive <= 0) return;
-  const totalMin = stopOffset(currentStops.length - 1);
-  const arr = new Date(n.getTime() + totalMin * 60000);
-  const inp = document.getElementById('arrivalInput');
-  if (inp) inp.value = String(arr.getHours()).padStart(2,'0')+':'+String(arr.getMinutes()).padStart(2,'0');
-  setArrival();
+  if (timeMode === 'departure') {
+    // set planned departure to now
+    document.getElementById('arrivalInput').value = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+    plannedDeparture = new Date(n);
+    plannedArrival = null;
+  } else {
+    // set arrival to now + total duration
+    const totalActive = activeStopCount();
+    if (totalActive <= 0) return;
+    const totalMin = stopOffset(currentStops.length - 1);
+    const arr = new Date(n.getTime() + totalMin * 60000);
+    document.getElementById('arrivalInput').value = String(arr.getHours()).padStart(2,'0')+':'+String(arr.getMinutes()).padStart(2,'0');
+    plannedArrival = new Date(arr);
+    plannedDeparture = null;
+  }
+  render();
 };
+
+window.toggleMode = function() {
+  timeMode = timeMode === 'departure' ? 'arrival' : 'departure';
+  const btn = document.getElementById('modeToggle');
+  btn.textContent = timeMode === 'departure' ? 'Vertrek' : 'Aankomst';
+  const label = document.getElementById('timeLabel');
+  label.textContent = timeMode === 'departure' ? 'Geplande vertrek:' : 'Geplande aankomst eindpunt:';
+  setNow();
+};
+
+function getRef() { return actualStart || getStartTime(); }
+function getPlannedTime(stopIdx) {
+  const ref = getRef();
+  if (!ref) return null;
+  if (stopIdx < startIndex() && stopIdx !== 0) return null; // garage has no planned time except index 0
+  if (stopIdx === 0) {
+    // garage departure time is reference (start of journey)
+    return ref;
+  }
+  return new Date(ref.getTime() + stopOffset(stopIdx) * 60000);
+}
 
 window.toggleFlex = function() {
   flexMode = !flexMode;
@@ -460,8 +500,11 @@ window.toggleAuto = function() {
 };
 
 function autoCheck() {
-  if (!autoMode || !actualStart || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
-  const departureTime = getPlannedTime(currentStopIndex + 1); // time to leave current stop
+  if (!autoMode || !actualStart || currentStopIndex < 0) return;
+  // if at garage (0), auto-advance to first stop after 2 minutes from reference
+  let nextStopIdx = currentStopIndex + 1;
+  if (nextStopIdx >= currentStops.length) return;
+  const departureTime = getPlannedTime(nextStopIdx);
   if (!departureTime) return;
   const now = new Date();
   if (now >= departureTime) {
@@ -472,9 +515,10 @@ function autoCheck() {
 window.switchLine = function(key) {
   if (!busLines[key]) return;
   currentLine = key;
-  currentStops = busLines[key].stops.map(s => ({...s})); // clone
+  currentStops = busLines[key].stops.map(s => ({...s}));
   currentStopIndex = -1;
   actualStart = null;
+  plannedDeparture = null;
   plannedArrival = null;
   document.getElementById('hLineNum').textContent = busLines[key].number;
   document.getElementById('hStatus').textContent = 'Garage Busdepot';
@@ -482,7 +526,6 @@ window.switchLine = function(key) {
   document.getElementById('btnVolgende').disabled = true;
   document.getElementById('btnTerug').disabled = true;
   document.getElementById('nextLineBar').style.display = 'none';
-  nextLineKey = null;
   setNow();
   render();
   document.querySelectorAll('.line-btn').forEach(b=>b.classList.remove('active'));
@@ -491,18 +534,18 @@ window.switchLine = function(key) {
 };
 
 window.depart = function() {
-  if (!plannedArrival) setNow();
-  actualStart = new Date();
-  currentStopIndex = startIndex();
-  document.getElementById('hStatus').textContent = 'Actief';
+  if (timeMode === 'departure' && !plannedDeparture) setNow();
+  if (timeMode === 'arrival' && !plannedArrival) setNow();
+  actualStart = new Date(); // the moment of departure from garage
+  currentStopIndex = 0;     // at garage
+  document.getElementById('hStatus').textContent = 'Vertrek';
   document.getElementById('btnVertrek').disabled = true;
   document.getElementById('btnVolgende').disabled = false;
   document.getElementById('btnTerug').disabled = true;
   document.getElementById('nextLineBar').style.display = 'none';
-  nextLineKey = null;
 
-  // Alert for early/late at first stop
-  const startTime = getStartTime();
+  // Alert for early/late at first stop (Medisch Centrum)
+  const startTime = getStartTime(); // planned departure from garage (= departure time of first active stop)
   if (startTime) {
     const diffMin = (actualStart - startTime) / 60000;
     const alertBox = document.getElementById('alertOverlay');
@@ -522,7 +565,7 @@ window.depart = function() {
 };
 
 window.nextStop = function() {
-  if (currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) return;
+  if (currentStopIndex >= currentStops.length-1) return;
   if (flexMode && currentStopIndex >= startIndex()) {
     const now = new Date();
     actualStart = new Date(now.getTime() - stopOffset(currentStopIndex) * 60000);
@@ -531,43 +574,51 @@ window.nextStop = function() {
   if (currentStopIndex === currentStops.length-1) {
     document.getElementById('btnVolgende').disabled = true;
     document.getElementById('hStatus').textContent = 'Eindbestemming';
-    // Show next line selector
     document.getElementById('nextLineBar').style.display = 'flex';
+  } else {
+    document.getElementById('hStatus').textContent = 'Actief';
+    document.getElementById('nextLineBar').style.display = 'none';
   }
-  document.getElementById('btnTerug').disabled = false;
+  if (currentStopIndex === 0) {
+    document.getElementById('btnTerug').disabled = true;
+  } else {
+    document.getElementById('btnTerug').disabled = false;
+  }
   render();
 };
 
 window.prevStop = function() {
-  if (currentStopIndex <= startIndex()) return;
+  if (currentStopIndex <= 0) return;
   currentStopIndex--;
   document.getElementById('btnVolgende').disabled = false;
-  if (currentStopIndex === startIndex()) document.getElementById('btnTerug').disabled = true;
+  if (currentStopIndex === 0) document.getElementById('btnTerug').disabled = true;
   document.getElementById('nextLineBar').style.display = 'none';
   render();
 };
 
 window.startNextLine = function() {
   const nextKey = document.getElementById('nextLineSelect').value;
-  breakMinutes = parseInt(document.getElementById('breakMinutes').value) || 0;
+  const breakMin = parseInt(document.getElementById('breakMinutes').value) || 0;
   if (!busLines[nextKey]) return;
-  // Store next line info
-  nextLineKey = nextKey;
-  // Simulate break: set actualStart to now + break minutes and switch line
   const now = new Date();
-  actualStart = null;
+  // The next journey will start after the break
+  plannedDeparture = new Date(now.getTime() + breakMin * 60000);
   plannedArrival = null;
+  timeMode = 'departure'; // switch to departure mode automatically for the next line
+  document.getElementById('modeToggle').textContent = 'Vertrek';
+  document.getElementById('timeLabel').textContent = 'Geplande vertrek:';
   currentLine = nextKey;
   currentStops = busLines[nextKey].stops.map(s => ({...s}));
   currentStopIndex = -1;
+  actualStart = null;
   document.getElementById('hLineNum').textContent = busLines[nextKey].number;
   document.getElementById('hStatus').textContent = 'Garage Busdepot';
   document.getElementById('btnVertrek').disabled = false;
   document.getElementById('btnVolgende').disabled = true;
   document.getElementById('btnTerug').disabled = true;
   document.getElementById('nextLineBar').style.display = 'none';
-  nextLineKey = null;
-  setNow();
+  // Update the time input to show the new planned departure
+  document.getElementById('arrivalInput').value = String(plannedDeparture.getHours()).padStart(2,'0')+':'+String(plannedDeparture.getMinutes()).padStart(2,'0');
   render();
 };
 
@@ -589,13 +640,17 @@ window.showBlock = function(name) { alert('Blokkeren: '+name); };
 function updateDelayPill() {
   const pill = document.getElementById('hDelay');
   if (!pill) return;
-  const ref = getRef();
-  if (!ref || currentStopIndex < 0 || currentStopIndex >= currentStops.length-1) {
+  if (currentStopIndex < 0 || !getRef()) {
     pill.textContent = '0,0';
     pill.className = 'delay-pill green';
     return;
   }
-  const nextStopIdx = currentStopIndex + 1;
+  let nextStopIdx = currentStopIndex + 1;
+  if (nextStopIdx >= currentStops.length) {
+    pill.textContent = '0,0';
+    pill.className = 'delay-pill green';
+    return;
+  }
   const plannedNext = getPlannedTime(nextStopIdx);
   if (!plannedNext) {
     pill.textContent = '0,0';
@@ -643,7 +698,7 @@ function render() {
     const extraText = s.extraWait > 0 ? `<div class="stop-extra">+${s.extraWait} min</div>` : '';
 
     let delayHtml = '';
-    if (i === currentStopIndex && i >= startIndex() && i < currentStops.length-1) {
+    if (i === currentStopIndex && i >= 0 && i < currentStops.length-1) {
       const plannedNext = getPlannedTime(i+1);
       if (plannedNext) {
         const now = new Date();
@@ -676,15 +731,13 @@ function render() {
   const badge = document.getElementById('badge');
   if (!ref) {
     badge.textContent = 'Aankomst: --:--';
-  } else if (currentStopIndex === -1 && plannedArrival && !actualStart) {
-    badge.textContent = 'Aankomst: '+fmtTime(plannedArrival);
-  } else if (currentStopIndex >= 0 && currentStopIndex < currentStops.length-1) {
+  } else if (currentStopIndex === -1) {
+    badge.textContent = 'Aankomst: --:--';
+  } else if (currentStopIndex < currentStops.length-1) {
     const next = getPlannedTime(currentStopIndex + 1);
     badge.textContent = 'Aankomst: '+fmtTime(next);
-  } else if (currentStopIndex >= currentStops.length-1) {
-    badge.textContent = 'Eindbestemming';
   } else {
-    badge.textContent = 'Aankomst: --:--';
+    badge.textContent = 'Eindbestemming';
   }
 
   updateDelayPill();
@@ -693,13 +746,13 @@ function render() {
 window.goHome = function() {
   currentStopIndex = -1;
   actualStart = null;
+  plannedDeparture = null;
   plannedArrival = null;
   document.getElementById('hStatus').textContent = 'Garage Busdepot';
   document.getElementById('btnVertrek').disabled = false;
   document.getElementById('btnVolgende').disabled = true;
   document.getElementById('btnTerug').disabled = true;
   document.getElementById('nextLineBar').style.display = 'none';
-  nextLineKey = null;
   setNow();
   render();
 };
@@ -721,11 +774,12 @@ window.showRit = function() {
   const content = document.getElementById('mainContent');
   content.innerHTML = `
     <div class="time-bar">
-      <label>Geplande aankomst eindpunt:</label>
-      <input type="time" id="arrivalInput" onchange="setArrival()">
+      <label id="timeLabel">Geplande vertrek:</label>
+      <input type="time" id="arrivalInput" onchange="setTime()">
       <button onclick="setNow()">Nu</button>
       <button class="toggle-btn" id="flexToggle" onclick="toggleFlex()">Vaste dienst</button>
       <button class="toggle-btn" id="autoToggle" onclick="toggleAuto()">Auto: Uit</button>
+      <button class="toggle-btn" id="modeToggle" onclick="toggleMode()">Vertrek</button>
     </div>
     <div class="stop-list" id="stopList"></div>
     <div class="next-line-bar" id="nextLineBar" style="display:none;">
@@ -745,6 +799,9 @@ window.showRit = function() {
   document.getElementById('flexToggle').className = flexMode ? 'toggle-btn active' : 'toggle-btn';
   document.getElementById('autoToggle').textContent = autoMode ? 'Auto: Aan' : 'Auto: Uit';
   document.getElementById('autoToggle').className = autoMode ? 'toggle-btn active' : 'toggle-btn';
+  document.getElementById('modeToggle').textContent = timeMode === 'departure' ? 'Vertrek' : 'Aankomst';
+  document.getElementById('timeLabel').textContent = timeMode === 'departure' ? 'Geplande vertrek:' : 'Geplande aankomst eindpunt:';
+  document.getElementById('arrivalInput').value = '';
   render();
 };
 window.showRitten = function() {
